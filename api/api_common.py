@@ -33,7 +33,7 @@ class api_calls:
         testruns, usergroups, users
     """
 
-    def __init__(self, username=None, password=None, baseurl=None, G_parameter=None):
+    def __init__(self, username=None, password=None, baseurl=None, G_parameter=None, loghandle=None):
         """ 
             Initialization method 
             Parameters:
@@ -54,12 +54,23 @@ class api_calls:
             self.password = self.G_parameter['General']['password']
             self.baseurl = self.G_parameter['General']['baseurl']
             self.Retry = int(self.G_parameter['General']['netretry'])
+            self.loghandle = loghandle
         else:
             self.username = username
             self.password = password
             self.baseurl = baseurl
             self.Retry = 5
+            self.loghandle = loghandle
     
+    def Print(self, message, flag="info"):
+        if self.loghandle is None:
+            print(flag+": "+message)
+        else:
+            if flag in ["info", "INFO", "I", "i"]:
+                self.loghandle.info(message)
+            elif flag in ["error", "Error", "E", "e"]:
+                self.loghandle.error(message)
+
     def httpget(self, url, auth=None):
         retry_count = 0
         response = None
@@ -72,11 +83,11 @@ class api_calls:
                     retry_count = retry_count + 1
                     response = None
             except Exception as e:
-                print(e)            
+                self.Print(e,flag="Error")
                 #retry = retry + 1
                 #response = None
         if response is None and retry_count == 5:
-            print("Can't get response, network error or parameter error, retry count = 5")
+            self.Print("Can't get response, network error or parameter error, retry count = 5",flag='Error')
         #print(url)
         return response
 
@@ -105,7 +116,7 @@ class api_calls:
         url = purl + "?" + query
         return url
 
-    def getResource(self, resource, suffix, params, input_url=None, endless=False, callback=None):
+    def getResource(self, resource, suffix, params=None, complete_url=None, endless=False, callback=None):
         """ 
             Discription: 
                     Function used to get resource
@@ -119,22 +130,26 @@ class api_calls:
         """
         rawdatas = []
 
-        if input_url is None:
-            purl = self.baseurl + resource + suffix 
+        if complete_url is None:
+            purl = self.baseurl + resource + suffix
+        else:
+            purl = complete_url 
 
         if endless == False:
-            url = self.combine(purl, params)
+            if params is not None:
+                url = self.combine(purl, params)
+            else:
+                url = purl
             response = self.httpget(url, auth=(self.username, self.password))
             if response is not None:
                 json_response = json.loads(response.text)
                 # Processing data side of response
                 json_response_data = json_response["data"]
                 rawdatas = json_response_data
+                self.Print(url+":succesful")
         else:
             while True:
-
                 url = self.combine(purl, params)
-                print(url)
                 response = self.httpget(url, auth=(self.username, self.password))
                 if response is None:
                     break
@@ -149,7 +164,7 @@ class api_calls:
                 # Processing data side of response
                 json_response_data = json_response["data"]
                 rawdatas = rawdatas + json_response_data
-
+                self.Print(url+":succesful")
                 if startIndex >= totalResults:
                     break
         if callback is None:

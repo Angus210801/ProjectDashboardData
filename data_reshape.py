@@ -9,8 +9,7 @@ class data_reshape:
     @classmethod              
     def getProjects_reshape(cls, raw_datas):
         """
-            Discription: raw data shape to new structure
-			param: raw_datas like:
+            raw_datas example:
                 "data": [{
                 "id": 20186,
                 "projectKey": "AP",
@@ -33,23 +32,57 @@ class data_reshape:
                 "type": "projects"
                 }]
 		"""
+        result = []
         if len(raw_datas) == 0:
             print("raw_datas is None")
-            return
-        result = []
-        for project in raw_datas:
-            result.append(
-                {"name": str(project["fields"]["name"]), "id": project["id"], "status": project["fields"]["statusId"]})
+        else:
+            for project in raw_datas:
+                result.append({"name": str(project["fields"]["name"]), "id": project["id"], "statusId": project["fields"]["statusId"]})
+                #result.append({project["id"]:{"name": str(project["fields"]["name"]), "status": project["fields"]["statusId"]}})
         return result
 
     @classmethod
     def getItemTypes_reshape(cls, raw_datas):
+        result = []
         # Saving only ID, display name and type key
         if len(raw_datas) == 0:
             print("raw_datas is None")
-            return
-        result = []
-        for item_type in raw_datas:
-            result.append({"id":item_type["id"],"name":item_type["display"],"type_key":item_type["typeKey"]})
+        else:
+            for item_type in raw_datas:
+                result.append({"id":item_type["id"],"name":item_type["display"],"type_key":item_type["typeKey"]})
         return result
 
+    @classmethod
+    def getStatus_reshape(cls, raw_datas):
+        """
+            raw_datas example
+            "data": {
+                "id": 156421,
+                "name": "Active",
+                "description": "",
+                "value": "",
+                "active": true,
+                "archived": false,
+                "sortOrder": 2,
+                "pickList": 89046,
+                "default": true,
+                "type": "picklistoptions"
+            }
+        """
+        result = ""
+        if len(raw_datas) == 0:
+            print("raw_datas is None")
+        else:
+            result = raw_datas["name"]
+        return result
+
+    @classmethod
+    def getTestPlans(cls, raw_datas):
+        result = {}
+        if len(raw_datas) == 0:
+            print("raw_datas is None")
+        else:
+            for test_plan in raw_datas:
+                result[test_plan["id"]] = {"name": str(re.sub('[^\w\-_\. ]', "", test_plan["fields"]["name"])),
+                                                    "id": test_plan["id"], "archived": test_plan["archived"]}
+        return result
