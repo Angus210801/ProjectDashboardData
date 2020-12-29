@@ -1,4 +1,4 @@
-
+import re
 """
 	Discription
 
@@ -85,4 +85,16 @@ class data_reshape:
             for test_plan in raw_datas:
                 result[test_plan["id"]] = {"name": str(re.sub('[^\w\-_\. ]', "", test_plan["fields"]["name"])),
                                                     "id": test_plan["id"], "archived": test_plan["archived"]}
+        return result
+
+    @classmethod
+    def getTestCycles(cls, raw_datas):
+        print(raw_datas)
+        result = {}
+        # if len(raw_datas) == 0:
+        #     print("raw_datas is None")
+        # else:
+        #     for test_plan in raw_datas:
+        #         result[test_plan["id"]] = {"name": str(re.sub('[^\w\-_\. ]', "", test_plan["fields"]["name"])),
+        #                                             "id": test_plan["id"], "archived": test_plan["archived"]}
         return result

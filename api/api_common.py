@@ -50,8 +50,8 @@ class api_calls:
         """
         if G_parameter is not None:
             self.G_parameter = G_parameter
-            self.username = self.G_parameter['General']['username']
-            self.password = self.G_parameter['General']['password']
+            self.username = self.G_parameter['General']['jamausername']
+            self.password = self.G_parameter['General']['jamapassword']
             self.baseurl = self.G_parameter['General']['baseurl']
             self.Retry = int(self.G_parameter['General']['netretry'])
             self.loghandle = loghandle

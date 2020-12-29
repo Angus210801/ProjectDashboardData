@@ -5,18 +5,6 @@ import logging
 import configparser
 from logging.handlers import RotatingFileHandler
 
-def checkFolders():
-	"""
-		Discription:
- 			check db/jira, log/%Y%m%d, if not exist, create it
-	"""
-	date = time.strftime("%Y%m%d", time.localtime(time.time()))
-	log_path = "./logs/%s"%(date)
-	if not os.path.exists("db/jira/"):
-		os.makedirs("db/jira")
-	if not os.path.exists(log_path):
-		os.makedirs(log_path)
-	return log_path
 
 class MyConfigParser(configparser.ConfigParser):
 
@@ -26,13 +14,19 @@ class MyConfigParser(configparser.ConfigParser):
     def optionxform(self, optionstr):
         return optionstr
 
-"""define logger object，inherit from logging.Logger，implement print to file and console"""
+"""
+	define logger object，inherit from logging.Logger，implement print to file and console
+	Be Care!!!: 
+	小心：这边的name和log_name是不一样的
+	当然logging这个函数在多进程是不安全是指写入同一个文件，要是不同进程写入文件文件不一样不存在这个问题。
+"""
 
 
 class MyLogger(object):
 
-	def __init__(self, name="logger", log_name=None, level=logging.DEBUG, console_level=logging.INFO, mode='a',config=None,log_path=None):
+	def __init__(self, name="logger", log_name=None, level=logging.DEBUG, console_level=logging.INFO, mode='a',config=None,logFolder_path=None):
 		self.logger = logging.getLogger(name)
+
 		#防止同一个实例加载好几次的handler
 		if len(self.logger.handlers) > 0:
 			return None
@@ -47,8 +41,8 @@ class MyLogger(object):
 			logbackupCount = 4
 			logrotatestarted = 1
 
-		if log_path is not None:
-			log_path_str = log_path
+		if logFolder_path is not None:
+			log_path_str = logFolder_path
 
 		# python 在创建filehandler时路径不存在会报FileNotFoundError，这里要新建下路径（而具体文件存不存在都时可以的，python会自动创建文件）
 		if not os.path.exists(log_path_str):
@@ -61,10 +55,10 @@ class MyLogger(object):
 			logFile = os.path.join(log_path_str, date_time + '.log')
 		else:
 			logFile = os.path.join(log_path_str, log_name + '.log')
+		self.logFile = logFile
 		# 创建一个logging输出到文件的handler并设置等级和输出格式
 		# mode属性用于控制写文件的模式，w模式每次程序运行都会覆盖之前的logger，而默认的是a则每次在文件末尾追加
 
-		#print(logFile)
 		formatter = logging.Formatter('%(asctime)-.19s %(levelname)-.1s %(name)-5.5s %(funcName)-15.15s "%(message)s"')
 		#fh = RotatingFileHandler(logFile, 'a', maxBytes=int(logmaxBytes) , backupCount=int(logbackupCount))
 		fh = logging.FileHandler(logFile, mode)
@@ -85,6 +79,9 @@ class MyLogger(object):
 
 	def getLogger(self):
 		return self.logger
+
+	def getlogFile(self):
+		return self.logFile
 
 	def setLevel(self, level):
 		self.logger.level = level

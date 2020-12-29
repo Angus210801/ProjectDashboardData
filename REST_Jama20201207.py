@@ -2,48 +2,28 @@ import os
 import re
 import sys
 import pdb
-import math
+import time
 import json
 import timeit
-import requests
-import mysql.connector
+import traceback
 
 from datetime import datetime
 from api.api_common import api_calls
 from data_reshape import data_reshape
+from Subprogress import Subprogress
 from Mysqlconn import Mysqlconn
-#from helper.common import common_functions
 
-#import logging
-import threading
-from concurrent.futures import ThreadPoolExecutor,as_completed
-Max_threads = 10
 
 import multiprocessing
-import utils
 from utils import MyLogger,MyConfigParser
 
-"""
-     Global parameter:
-        G_parameter: for config.ini.
-        all_projects: one project have one database.
-        active_projects: user can decide which projects are active.
-"""
-#G_parameter = {}
 
-#jama_status = {}
-#[{'keyy': 'ANAC', 'name': 'Anaconda', 'webstatus': 'Active', 'jama_id': 20434}, {'keyy': 'BEZOS', 'name': 'Bezos', 'webstatus': 'Active', 'jama_id': 20340}]
-"""
-    General check
-	1.check folders->create main.log
-"""
-#log_path = utils.checkFolders()
-#print(log_path)
-#LOGGER_CONTROL = MyLogger(log_name="main", log_path=log_path)
-#LOGGER_CONTROL.disable_file()
-#LOGGER_Main = LOGGER_CONTROL.getLogger()
 
 def read_config_file():
+    """
+        Discription:
+            get the configuration of Config.ini and save it in G_paramter
+    """
     G_parameter = {}
     cfg = MyConfigParser()
     cfg_path = "./config.ini"
@@ -58,17 +38,43 @@ def read_config_file():
         for key in cfg['JamaTeams']:
             teams = cfg.get('JamaTeams',key)
             G_parameter['JamaTeams'][key] = teams.splitlines()
-    print(G_parameter)
     return G_parameter
 
-def check_database_projects():
-    #global all_projects,active_projects
+def CreateFolders(G_parameter):
+    """
+        Discription:
+            check db/jira, log/%Y%m%d, if not exist, create it
+        Parameters:
+            param1 - G_paramter comes from Config.ini
+    """
+    date = time.strftime("%Y%m%d", time.localtime(time.time()))
+    logFolder_path = os.path.join(G_parameter['General']['baselogpath'],date)
+    if not os.path.exists("db/jira/"):
+        os.makedirs("db/jira")
+    if not os.path.exists(logFolder_path):
+        os.makedirs(logFolder_path)
+    return logFolder_path
+
+def check_database_projects(G_parameter):
+    """
+        Discription:
+            1.all projects store in projects database.
+            2.every project have a database and database name is jamaid.
+            3.if a project is configured active by website, it means that it should update from jama
+            if a project(active) is found in projects database but have not seperated databse, should create it.
+
+        Parameters:
+            param1 - G_paramter comes from Config.ini
+        Return:
+            param1 - all_projects, type-list, store all projects ids,[20446....] 
+            param2 - active_projects， type-list, store all 
+    """
     all_projects = []
     active_projects = []
     mydb = Mysqlconn(
-            host="127.0.0.1",
-            user="root",
-            passwd="jabra2020",
+            host=G_parameter['General']['mysqlhost'],
+            user=G_parameter['General']['mysqluser'],
+            passwd=G_parameter['General']['mysqlpassword'],
             database="projects"
     )
     cursor = mydb.cursor
@@ -121,60 +127,60 @@ def pre_deal_projects(jama_projects, active_projects, rest_api):
             final_projects.append(project)
     return final_projects
 
-def fetch_data(project, G_parameter, log_path):
-        LOGGER_CONTROL = MyLogger(log_name=project["name"], log_path=log_path)
-        LOGGER_SUB = LOGGER_CONTROL.getLogger()
-        rest_api = api_calls(G_parameter = G_parameter, loghandle = LOGGER_SUB)
-        existing_testplans = rest_api.getResource(resource="testplans", suffix="", \
-                params={"project":project["id"],"startAt":0,"maxResults":50}, callback=data_reshape.getTestPlans, endless=True)
-        LOGGER_SUB.info(existing_testplans)
+def throw_exception(name):
+    print("Sub progress %s raise a exception"%name)
+
+def fetch_data(project, jama_itemtypes, G_parameter, logFolder_path):
+    LOGGER_CONTROL = MyLogger(name = project["name"], log_name= project["name"], logFolder_path = logFolder_path)
+    LOGGER_SUB = LOGGER_CONTROL.getLogger()
+    logFile_path = LOGGER_CONTROL.getlogFile()
+
+    try:
+        sub_process = Subprogress(project, G_parameter, LOGGER_SUB)
+        sub_process.Get_allcases()
+    except:
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+    #     #LOGGER_SUB.error(repr(traceback.format_exception(exc_type, exc_value, exc_traceback)))
+        traceback.print_exc(file=open(logFile_path,'a'))
 
 
 if __name__ == "__main__":
+    jama_projects, jama_itemtypes = [],[]
     ### prepare phase
-    log_path = utils.checkFolders()
     G_parameter = read_config_file()
-    log_path = utils.checkFolders()
-    LOGGER_CONTROL = MyLogger(log_name="main", log_path=log_path)
+    logFolder_path = CreateFolders(G_parameter)
+    LOGGER_CONTROL = MyLogger(name= "main", log_name="main", logFolder_path=logFolder_path)
+    #Main_logFile_path = LOGGER_CONTROL.getlogFile()
     #LOGGER_CONTROL.disable_file()
     LOGGER_Main = LOGGER_CONTROL.getLogger()
     LOGGER_Main.info(G_parameter)
 
 
     ### pre project deal.
-    all_projects, active_projects = check_database_projects()
+    all_projects, active_projects = check_database_projects(G_parameter)
     rest_api = api_calls(G_parameter = G_parameter, loghandle = LOGGER_Main)
     jama_projects = rest_api.getResource(resource="projects", suffix="", params={"startAt":0,"maxResults":50}, \
                                                callback=data_reshape.getProjects_reshape, endless=True)
     jama_itemtypes = rest_api.getResource(resource="itemtypes", suffix="", params={"startAt":0,"maxResults":50}, \
                                               callback=data_reshape.getItemTypes_reshape, endless=True)
 
-    #print(jama_projects)
-    active_projects = [{'keyy': 'ANAC', 'name': 'Anaconda', 'webstatus': 'Active', 'id': 20434}, \
-                        {'keyy': 'BEZOS', 'name': 'Bezos', 'webstatus': 'Active', 'id': 20340}]
-    final_projects = pre_deal_projects(jama_projects, active_projects, rest_api)
 
+    #active_projects = [{'keyy': 'ANAC', 'name': 'Anaconda', 'webstatus': 'Active', 'id': 20434}, \
+    #                    {'keyy': 'BEZOS', 'name': 'Bezos', 'webstatus': 'Active', 'id': 20340}]
+    active_projects = [{'keyy': 'ANAC', 'name': 'Anaconda', 'webstatus': 'Active', 'id': 20434}]
+    #final_projects = pre_deal_projects(jama_projects, active_projects, rest_api)
+
+    final_projects = active_projects
     ### start fetch data from jama for every project 
-    pool = multiprocessing.Pool(processes = 10)
+    pool = multiprocessing.Pool(processes = 1)
     for project in final_projects:
-        pool.apply_async(func=fetch_data, args=(project, G_parameter, log_path))
+        pool.apply_async(func=fetch_data, args=(project, jama_itemtypes , G_parameter, logFolder_path,))
 
     pool.close()
-    pool.join()  # 进程池中进程执行完毕后再关闭，如果注释，那么程序直接关闭。
+    pool.join()
     pool.terminate()
     pool.close()
-    # #     if p_id not in jama_projects_ids:
-    #         LOGGER_Main.error("This project %s is not in jama"%(name))
-    #         continue
-    #     rest_api.getResource(resource="picklistoptions", suffix="", project["status"])
-    # # 	msg = "hello %d" %(i)
-    #    pool.apply_async(main_single_project, (msg, ))
 
-    # pool = multiprocessing.Pool(processes = 10)
-
-    # with multiprocessing.Pool(processes=10) as pool:
-
-    #     results = pool.apply_async()
 
 
 
