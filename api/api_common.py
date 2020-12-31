@@ -87,7 +87,7 @@ class api_calls:
                 #retry = retry + 1
                 #response = None
         if response is None and retry_count == 5:
-            self.Print("Can't get response, network error or parameter error, retry count = 5",flag='Error')
+            self.Print("Can't url:%s get response, network error or parameter error, retry count = 5"%(url),flag='Error')
         #print(url)
         return response
 
@@ -128,6 +128,7 @@ class api_calls:
             Returns:
                 rawdatas
         """
+        rawmeta = {}
         rawdatas = []
 
         if complete_url is None:
@@ -140,16 +141,20 @@ class api_calls:
                 url = self.combine(purl, params)
             else:
                 url = purl
+            self.Print(url+":start")
             response = self.httpget(url, auth=(self.username, self.password))
             if response is not None:
                 json_response = json.loads(response.text)
                 # Processing data side of response
-                json_response_data = json_response["data"]
-                rawdatas = json_response_data
+                if "data" in json_response:
+                    rawdatas = json_response["data"]
+                if "meta" in json_response:
+                    rawmeta = json_response["meta"]
                 self.Print(url+":succesful")
         else:
             while True:
                 url = self.combine(purl, params)
+                self.Print(url+":start")
                 response = self.httpget(url, auth=(self.username, self.password))
                 if response is None:
                     break
@@ -168,9 +173,42 @@ class api_calls:
                 if startIndex >= totalResults:
                     break
         if callback is None:
+            return rawdatas,rawmeta
+        else:
+            return callback(rawdatas,rawmeta)
+
+
+    def NewgetTestCases(self, resource, test_plan_id, test_group_id, params = {"startAt":0,"maxResults":50}, endless=True, callback=None):
+        """ Function to get test case info for a test group in a test plan """
+        purl = self.baseurl + resource + "/%s/"%(test_plan_id) + "testgroups/%s/testcases"%(test_group_id)
+        rawdatas = []
+
+        while True:
+                url = self.combine(purl, params)
+                self.Print(url+":start")
+                response = self.httpget(url, auth=(self.username, self.password))
+                if response is None:
+                    break
+                json_response = json.loads(response.text)
+
+                page_info = json_response["meta"]["pageInfo"]
+                resultCount = page_info["resultCount"]
+                totalResults = page_info["totalResults"]
+                startIndex = page_info["startIndex"] + resultCount
+                params['startAt'] = startIndex
+
+                # Processing data side of response
+                json_response_data = json_response["data"]
+                rawdatas = rawdatas + json_response_data
+                self.Print(url+":succesful")
+                if startIndex >= totalResults:
+                    break
+
+        if callback is None:
             return rawdatas
         else:
-            return callback(rawdatas)
+            return callback(test_group_id, rawdatas)
+
 
     def getFilterId(self,project_id):
         """ Function used to get filter ID """
@@ -432,81 +470,6 @@ class api_calls:
                 test_cases[test_case["id"]] = test_case
 
         return test_cases
-    
-    def New_getTestCases(self,test_plan_id,test_group_id):
-        """ Function to get test case info for a test group in a test plan """
-        test_cases = {}
-        resources = "testplans/%s/testgroups/%s/testcases"%(test_plan_id,test_group_id)
-        allowed_results = 50
-        max_results = "maxResults=" + str(allowed_results)
-        result_count = -1
-        start_index = 0
-        result={}
-        while result_count != 0:
-            start_at = "startAt=" + str(start_index)
-            url = self.base_url + resources + "?" + start_at + "&" + max_results
-            response = requests.get(url, auth=(self.username, self.password))
-            json_response = json.loads(response.text)
-            # Processing meta side of response
-            page_info = json_response["meta"]["pageInfo"]
-            start_index = page_info["startIndex"] + allowed_results
-            result_count = page_info["resultCount"]
-            # Processing data side of response
-            json_response_data = json_response["data"]
-            for test_case in json_response_data:
-                test_cases[test_case["id"]] = test_case
-
-        result = {"test_group":test_group_id,"test_cases":test_cases}
-        return result
-
-    def getTestCycles(self,test_plan_id):
-        """ Function used to get test cycles for a test plan """
-        print ("Processing test cycle request...")
-        test_cycles = {}
-        resources = "testplans/%s/testcycles"%test_plan_id
-        allowed_results = 50
-        max_results = "maxResults=" + str(allowed_results)
-        result_count = -1
-        start_index = 0
-        while result_count != 0:
-            start_at = "startAt=" + str(start_index)
-            url = self.base_url + resources + "?" + start_at + "&" + max_results
-            response = requests.get(url, auth=(self.username, self.password))
-            json_response = json.loads(response.text)
-            # Processing meta side of response
-            page_info = json_response["meta"]["pageInfo"]
-            start_index = page_info["startIndex"] + allowed_results
-            result_count = page_info["resultCount"]
-            # Processing data side of response
-            json_response_data = json_response["data"]
-            for test_cycle in json_response_data:
-                test_cycles[test_cycle["id"]] = test_cycle
-
-        return test_cycles
-
-    def getTestGroups(self,test_plan_id):
-        """ Function used to get test groups for specific test plan """
-        test_groups = {}
-        resources = "testplans/%s/testgroups"%test_plan_id
-        allowed_results = 50
-        max_results = "maxResults=" + str(allowed_results)
-        result_count = -1
-        start_index = 0
-        while result_count != 0:
-            start_at = "startAt=" + str(start_index)
-            url = self.base_url + resources + "?" + start_at + "&" + max_results
-            response = requests.get(url, auth=(self.username, self.password))
-            json_response = json.loads(response.text)
-            # Processing meta side of response
-            page_info = json_response["meta"]["pageInfo"]
-            start_index = page_info["startIndex"] + allowed_results
-            result_count = page_info["resultCount"]
-            # Processing data side of response
-            json_response_data = json_response["data"]
-            for test_group in json_response_data:
-                test_groups[test_group["id"]] = test_group
-
-        return test_groups
 
     def getTestPlanId(self,project_id):
         """ Function used to get testplan ID """
@@ -633,28 +596,6 @@ class api_calls:
                 test_runs.append(test_run)
 
         return test_runs
-
-    def getTestRunsByTestplan_all(self,testplan):
-        """ Function used to get test runs for a testplan """
-        test_runs = []
-        start_index = 0
-        allowed_results = 50
-        totalResults = 0
-        resources = "testruns?testPlan=%s"%testplan
-        start_at = "startAt=" + str(start_index)
-        max_results = "maxResults=" + str(allowed_results)
-
-        url = self.base_url + resources + "&" + start_at + "&" + max_results
-
-        response = self.requests.get(url, auth=(self.username, self.password))
-        if response is None:
-            totalResults = 0
-        else:
-            json_response = json.loads(response.text)
-
-            totalResults = json_response["meta"]["pageInfo"]["totalResults"]
-
-        return totalResults
 
     def getTestRunsByTestplan_sub(self,testplan, start_index):
         """ Function used to get test runs for a testplan """
@@ -790,30 +731,6 @@ class api_calls:
                     break
         return r_testplan,r_testcase,r_testgroup, r_upstreamrelations,r_status,r_team,r_rel,team_id,n_team
 
-
-    def getParent(self,item_id):
-        resources = "items/%s/parent"%item_id
-        url = self.base_url + resources
-        response = requests.get(url, auth=(self.username, self.password))
-        json_response = json.loads(response.text)
-        # Processing data side of response
-        try:
-            json_response_data = json_response["data"]
-        except Exception:
-            json_response_data = "Unspecified"
-        return json_response_data
-
-    def getStatus(self,status_id):
-        """ Function used to get status by given ID
-            Returns only the name for status
-        """
-        resources = "picklistoptions/%s"%status_id
-        url = self.base_url + resources
-        response = requests.get(url, auth=(self.username, self.password))
-        json_response = json.loads(response.text)
-        # Processing data side of response
-        json_response_data = json_response["data"]
-        return json_response_data["name"]
 
     def getTeam(self,verifyids):
         """ Function used to get status by given ID

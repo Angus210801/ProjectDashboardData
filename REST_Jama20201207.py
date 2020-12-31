@@ -48,12 +48,12 @@ def CreateFolders(G_parameter):
             param1 - G_paramter comes from Config.ini
     """
     date = time.strftime("%Y%m%d", time.localtime(time.time()))
-    logFolder_path = os.path.join(G_parameter['General']['baselogpath'],date)
+    LOGFOLDER_PATH = os.path.join(G_parameter['General']['baselogpath'],date)
     if not os.path.exists("db/jira/"):
         os.makedirs("db/jira")
-    if not os.path.exists(logFolder_path):
-        os.makedirs(logFolder_path)
-    return logFolder_path
+    if not os.path.exists(LOGFOLDER_PATH):
+        os.makedirs(LOGFOLDER_PATH)
+    return LOGFOLDER_PATH
 
 def check_database_projects(G_parameter):
     """
@@ -127,38 +127,64 @@ def pre_deal_projects(jama_projects, active_projects, rest_api):
             final_projects.append(project)
     return final_projects
 
-def throw_exception(name):
-    print("Sub progress %s raise a exception"%name)
+#def throw_exception(name):
+#    print("Sub progress %s raise a exception"%name)
 
-def fetch_data(project, jama_itemtypes, G_parameter, logFolder_path):
-    LOGGER_CONTROL = MyLogger(name = project["name"], log_name= project["name"], logFolder_path = logFolder_path)
-    LOGGER_SUB = LOGGER_CONTROL.getLogger()
-    logFile_path = LOGGER_CONTROL.getlogFile()
+# class MultilogExceptions(object):
+#     def __init__(self, callable):
+#         self.__callable = callable
+
+#     def __call__(self, LOGFOLDER_PATH, *args, **kwargs):
+#         print(LOGFILE_PATH_SUB)
+#         try:
+#             LOGGER_CONTROL = MyLogger(name = project["name"], log_name= project["name"], LOGFOLDER_PATH = LOGFOLDER_PATH)
+#             LOGGER_SUB = LOGGER_CONTROL.getLogger()
+#             logFile_path = LOGGER_CONTROL.getlogFile()
+#             result = self.__callable(*args, **kwargs)
+
+#         except Exception as e:
+#             # Here we add some debugging help. If multiprocessing's
+#             # debugging is on, it will arrange to log the traceback
+#             exc_type, exc_value, exc_traceback = sys.exc_info()
+#             #error(traceback.format_exc())
+#             traceback.print_exc(file=open(LOGFILE_PATH_SUB,'a'))
+#             # Re-raise the original exception so the Pool worker can
+#             # clean up
+#             raise
+#         return result
+
+
+def fetch_data(project, jama_itemtypes, G_parameter, LOGFOLDER_PATH):
+    LOGGER_CONTROL = MyLogger(name = project["name"], log_name= project["name"], LOGFOLDER_PATH = LOGFOLDER_PATH)
+    LOGGER_SUB_HANDLE = LOGGER_CONTROL.getLogger()
+    LOGFILE_PATH_SUB = LOGGER_CONTROL.getlogFile()
 
     try:
-        sub_process = Subprogress(project, G_parameter, LOGGER_SUB)
-        sub_process.Get_allcases()
+
+        sub_process = Subprogress(project, G_parameter, LOGGER_SUB_HANDLE)
+        sub_process.Get_alltests()
+        sub_process.Store_alltests()
     except:
         exc_type, exc_value, exc_traceback = sys.exc_info()
-    #     #LOGGER_SUB.error(repr(traceback.format_exception(exc_type, exc_value, exc_traceback)))
-        traceback.print_exc(file=open(logFile_path,'a'))
+        traceback.print_exc(file=open(LOGFILE_PATH_SUB,'a'))
 
 
 if __name__ == "__main__":
+
     jama_projects, jama_itemtypes = [],[]
     ### prepare phase
     G_parameter = read_config_file()
-    logFolder_path = CreateFolders(G_parameter)
-    LOGGER_CONTROL = MyLogger(name= "main", log_name="main", logFolder_path=logFolder_path)
-    #Main_logFile_path = LOGGER_CONTROL.getlogFile()
+    LOGFOLDER_PATH = CreateFolders(G_parameter)
+    LOGGER_CONTROL = MyLogger(name= "main", log_name="main", LOGFOLDER_PATH=LOGFOLDER_PATH)
+
     #LOGGER_CONTROL.disable_file()
-    LOGGER_Main = LOGGER_CONTROL.getLogger()
-    LOGGER_Main.info(G_parameter)
+    LOGGER_MAIN_HANDLE = LOGGER_CONTROL.getLogger()
+    LOGGER_MAIN_HANDLE.info(G_parameter)
 
 
     ### pre project deal.
     all_projects, active_projects = check_database_projects(G_parameter)
-    rest_api = api_calls(G_parameter = G_parameter, loghandle = LOGGER_Main)
+    rest_api = api_calls(G_parameter = G_parameter, loghandle = LOGGER_MAIN_HANDLE)
     jama_projects = rest_api.getResource(resource="projects", suffix="", params={"startAt":0,"maxResults":50}, \
                                                callback=data_reshape.getProjects_reshape, endless=True)
     jama_itemtypes = rest_api.getResource(resource="itemtypes", suffix="", params={"startAt":0,"maxResults":50}, \
@@ -172,9 +198,11 @@ if __name__ == "__main__":
 
     final_projects = active_projects
     ### start fetch data from jama for every project 
+    print(list(G_parameter['JamaTeams'].keys()))
     pool = multiprocessing.Pool(processes = 1)
     for project in final_projects:
-        pool.apply_async(func=fetch_data, args=(project, jama_itemtypes , G_parameter, logFolder_path,))
+
+        pool.apply_async(func=fetch_data, args=(project, jama_itemtypes , G_parameter,LOGFOLDER_PATH,))
 
     pool.close()
     pool.join()

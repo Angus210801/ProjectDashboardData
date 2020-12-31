@@ -24,7 +24,7 @@ class MyConfigParser(configparser.ConfigParser):
 
 class MyLogger(object):
 
-	def __init__(self, name="logger", log_name=None, level=logging.DEBUG, console_level=logging.INFO, mode='a',config=None,logFolder_path=None):
+	def __init__(self, name="logger", log_name=None, level=logging.DEBUG, console_level=logging.INFO, mode='a',config=None,LOGFOLDER_PATH=None):
 		self.logger = logging.getLogger(name)
 
 		#防止同一个实例加载好几次的handler
@@ -41,8 +41,8 @@ class MyLogger(object):
 			logbackupCount = 4
 			logrotatestarted = 1
 
-		if logFolder_path is not None:
-			log_path_str = logFolder_path
+		if LOGFOLDER_PATH is not None:
+			log_path_str = LOGFOLDER_PATH
 
 		# python 在创建filehandler时路径不存在会报FileNotFoundError，这里要新建下路径（而具体文件存不存在都时可以的，python会自动创建文件）
 		if not os.path.exists(log_path_str):
