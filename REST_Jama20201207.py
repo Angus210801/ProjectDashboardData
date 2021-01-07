@@ -77,20 +77,21 @@ def check_database_projects(G_parameter):
             passwd=G_parameter['General']['mysqlpassword'],
             database="projects"
     )
-    cursor = mydb.cursor
-    mydb.execute("SHOW DATABASES")
-    for project in cursor:
-        all_projects.append(project[0])
-    mydb.execute("SELECT keyy, name, status, jama FROM projects WHERE status = 'Active' AND jama != 0")
+    if mydb.connect():
+        mydb.execute("SHOW DATABASES")
+        for project in mydb.cursor:
+            all_projects.append(project[0])
+        mydb.execute("SELECT keyy, name, status, jama FROM projects WHERE status = 'Active' AND jama != 0")
 
-    results = cursor.fetchall()
-    for keyy, name, webstatus, jamaId in results:
-        if str(jamaId) not in all_projects:
-            mydb.execute("CREATE DATABASE IF NOT EXISTS `%d`" % jamaId)
-        active_projects.append({"keyy":keyy,"name":name,"webstatus":webstatus,"id":jamaId})
-    mydb.cursor_close()
-    mydb.db_commit()
-    mydb.db_close()
+        results = mydb.fetchall()
+        for keyy, name, webstatus, jamaId in results:
+            if str(jamaId) not in all_projects:
+                mydb.execute("CREATE DATABASE IF NOT EXISTS `%d`" % jamaId)
+            active_projects.append({"keyy":keyy,"name":name,"webstatus":webstatus,"id":jamaId})
+        mydb.cursor_close()
+        mydb.db_commit()
+        mydb.db_close()
+
     return all_projects, active_projects
 
 def pre_deal_projects(jama_projects, active_projects, rest_api):
@@ -163,7 +164,7 @@ def fetch_data(project, jama_itemtypes, G_parameter, LOGFOLDER_PATH):
 
         sub_process = Subprogress(project, G_parameter, LOGGER_SUB_HANDLE)
         sub_process.Get_alltests()
-        sub_process.Store_alltests()
+        #sub_process.Store_alltests()
     except:
         exc_type, exc_value, exc_traceback = sys.exc_info()
         traceback.print_exc(file=open(LOGFILE_PATH_SUB,'a'))
@@ -184,6 +185,7 @@ if __name__ == "__main__":
 
     ### pre project deal.
     all_projects, active_projects = check_database_projects(G_parameter)
+
     rest_api = api_calls(G_parameter = G_parameter, loghandle = LOGGER_MAIN_HANDLE)
     jama_projects = rest_api.getResource(resource="projects", suffix="", params={"startAt":0,"maxResults":50}, \
                                                callback=data_reshape.getProjects_reshape, endless=True)

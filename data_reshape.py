@@ -195,7 +195,11 @@ class data_reshape:
                     "lastActivityDate":test_case["lastActivityDate"],
                     "testCaseStatus":test_case["fields"]["testCaseStatus"],
                     "testRunResults":test_case["fields"]["testRunResults"],
-                    "statusId":statusId
+                    "statusId":statusId,
+                    ###these information need to fecth data from jama again 
+                    "status":"",
+                    "team":"",
+                    "upstream":""
                 }
         #result = {"testgroup":test_group_id,"testcases":test_cases}
 
@@ -225,7 +229,15 @@ class data_reshape:
                     "testRunStatus":test_run["fields"]["testRunStatus"],
                     "testgroupId":test_run["testGroup"],
                     "testcaseId":test_run["fields"]["testCase"],
-                    "index":index
+                    "index":index,
+                    ###these information need to fecth data from jama again
+                    "testplanname":"",
+                    "testcyclename":"",
+                    "testgroupname":"",
+                    "testcasename":"",
+                    "testcasestatus":"",
+                    "testcaseteam":"",
+                    "testcaseupstream":""
                 }
 
         return result
