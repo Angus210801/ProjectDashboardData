@@ -57,6 +57,19 @@ class Mysqlconn:
 		else:
 			self.Print("execute %s failed because mydb or cursor is None!!!")
 
+	def executemany(self, cmd, data, rollback=False):
+		if self.checkdb():
+			if rollback==False:
+				self.cursor.executemany(cmd,data)
+			else:
+				try:
+					self.cursor.executemany(cmd,data)
+				except Exception as e:
+					self.mydb.rollback()
+					self.Print(e)
+		else:
+			self.Print("executemany %s failed because mydb or cursor is None!!!")
+
 	def fetchall(self):
 		result = []
 		if self.checkdb():

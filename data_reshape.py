@@ -235,9 +235,11 @@ class data_reshape:
                     "testcyclename":"",
                     "testgroupname":"",
                     "testcasename":"",
+                    "testcasedocumentKey":"",
                     "testcasestatus":"",
                     "testcaseteam":"",
-                    "testcaseupstream":""
+                    "testcaseupstream":"",
+                    "valid":True
                 }
 
         return result

@@ -157,6 +157,7 @@ def pre_deal_projects(jama_projects, active_projects, rest_api):
 
 def fetch_data(project, jama_itemtypes, G_parameter, LOGFOLDER_PATH):
     LOGGER_CONTROL = MyLogger(name = project["name"], log_name= project["name"], LOGFOLDER_PATH = LOGFOLDER_PATH)
+    LOGGER_CONTROL.disable_console()
     LOGGER_SUB_HANDLE = LOGGER_CONTROL.getLogger()
     LOGFILE_PATH_SUB = LOGGER_CONTROL.getlogFile()
 
@@ -164,7 +165,7 @@ def fetch_data(project, jama_itemtypes, G_parameter, LOGFOLDER_PATH):
 
         sub_process = Subprogress(project, G_parameter, LOGGER_SUB_HANDLE)
         sub_process.Get_alltests()
-        #sub_process.Store_alltests()
+        sub_process.Store_alltests()
     except:
         exc_type, exc_value, exc_traceback = sys.exc_info()
         traceback.print_exc(file=open(LOGFILE_PATH_SUB,'a'))
@@ -193,9 +194,10 @@ if __name__ == "__main__":
                                               callback=data_reshape.getItemTypes_reshape, endless=True)
 
 
-    #active_projects = [{'keyy': 'ANAC', 'name': 'Anaconda', 'webstatus': 'Active', 'id': 20434}, \
-    #                    {'keyy': 'BEZOS', 'name': 'Bezos', 'webstatus': 'Active', 'id': 20340}]
-    active_projects = [{'keyy': 'ANAC', 'name': 'Anaconda', 'webstatus': 'Active', 'id': 20434}]
+    active_projects = [{'keyy': 'ANAC', 'name': 'Anaconda', 'webstatus': 'Active', 'id': 20434}, \
+                       {'keyy': 'PYT', 'name': 'Python', 'webstatus': 'Active', 'id': 20446}]
+    #active_projects = [{'keyy': 'ANAC', 'name': 'Anaconda', 'webstatus': 'Active', 'id': 20434}]
+    active_projects = [{'keyy': 'PYT', 'name': 'Python', 'webstatus': 'Active', 'id': 20446}]
     #final_projects = pre_deal_projects(jama_projects, active_projects, rest_api)
 
     final_projects = active_projects
