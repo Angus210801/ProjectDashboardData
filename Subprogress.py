@@ -1,6 +1,6 @@
 import math
 import threading
-from datetime import datetime
+from datetime import datetime, timedelta
 from Mysqlconn import Mysqlconn
 from api.api_common import api_calls
 
@@ -11,8 +11,9 @@ from concurrent.futures import ThreadPoolExecutor,as_completed
 
 class Subprogress:
 
-    def __init__(self, project, G_parameter, loghandle):
+    def __init__(self, project, jama_itemtypes, G_parameter, loghandle):
         self.project = project
+        self.jama_itemtypes = jama_itemtypes
         self.Not_Found = "Not Found"
         self.G_parameter = G_parameter
         self.Max_threads = G_parameter['General']["Max_threads"]
@@ -26,6 +27,13 @@ class Subprogress:
         ### Store all caseteams in project. {parentId:team,...}
         self.P_caseteams = {}
 
+        self.P_allfeatures = []
+        self.P_changefeatures = []
+        self.P_deletefeatures = []
+
+        self.P_changerequests = []
+        self.P_allchangerequests = []
+
         self.existing_testplans = {}
 
         self.loghandle = loghandle
@@ -38,6 +46,12 @@ class Subprogress:
             loghandle = self.loghandle
         )
         self.dbenable = self.mydb.connect()
+
+    def getType(self, input_type):
+        """Function to get item type"""
+        for item_type in self.jama_itemtypes:
+            if item_type["type_key"].lower() == input_type.lower():
+                return item_type["id"]
 
     def get_status(self, statusId):
         status = 0
@@ -133,6 +147,45 @@ class Subprogress:
                 result = future.result()
                 testcases.update(result)        
         return testcases
+
+    def get_features(self, projectId, feature_type_id):
+        features = []
+        features = self.rest_api.getResource(resource="abstractitems", suffix="", \
+            params={"project":projectId,"startAt":0,"maxResults":50,"itemType":feature_type_id}, callback=data_reshape.getFeatures, endless=True)
+
+        return features
+
+    def get_change_features(self, projectId, feature_type_id):
+        change_features = []
+        change_features = self.rest_api.getResource(resource="abstractitems", suffix="", \
+            params={"project":projectId,"startAt":0,"maxResults":50,"itemType":feature_type_id,"lastActivityDate":str(datetime.now().date()-timedelta(30)) + "T00%3A00%3A00%2B00%3A00&"}, \
+            callback=data_reshape.getChangeFeatures, endless=True)
+
+        return change_features
+
+
+    def get_delete_features(self, projectId, feature_type_id):
+        delete_features = []
+        delete_features = self.rest_api.getResource(resource="activities", suffix="", \
+            params={"project":projectId,"startAt":0,"maxResults":50,"itemType":feature_type_id,"eventType":"DELETE","objectType":"ITEM","deleteEvents":"true"}, \
+            callback=data_reshape.getDeleteFeatures, endless=True)
+
+        return delete_features
+
+    def get_change_requests(self, projectId, item_type_id):
+        change_requests = []
+        change_requests = self.rest_api.getResource(resource="abstractitems", suffix="", \
+            params={"project":projectId,"startAt":0,"maxResults":50,"itemType":item_type_id,"lastActivityDate":str(datetime.now().date()-timedelta(30)) + "T00%3A00%3A00%2B00%3A00&"}, \
+            callback=data_reshape.getChangeRequests, endless=True)
+
+        return change_requests
+
+    def get_allchangerequests(self, projectId, item_type_id):
+        allchange_requests = []
+        allchange_requests = self.rest_api.getResource(resource="abstractitems", suffix="", \
+            params={"project":projectId,"startAt":0,"maxResults":50,"itemType":item_type_id}, callback=data_reshape.getAllChangeRequests, endless=True)
+
+        return allchange_requests
 
     def tidy_alltestcases(self):
         """
@@ -245,7 +298,7 @@ class Subprogress:
         self.loghandle.info("Get project name:%s id:%s all testplans successful!!!"%(self.project["name"], self.project["id"]))
 
         #for testplanId in [8041459,3904102]:
-        if self.project["name"] == "ANAC":
+        if self.project["keyy"] == "ANAC":
             self.tmp_list = [3904102]
         else:
             self.tmp_list = [7372947]
@@ -270,7 +323,48 @@ class Subprogress:
         # self.P_alltests = P_alltests
         # self.P_testcases = P_testcases
 
-    def update_database_tests(self, existing_testplans):
+    def Get_allfeatuers(self):
+        tables = self.project["tables"]
+        projectId = self.project["id"]
+        feature_type_id = self.getType("feat")
+        if "features" in tables:
+            self.P_changefeatures =  self.get_change_features(projectId, feature_type_id)
+            self.P_deletefeatures = self.get_delete_features(projectId,feature_type_id)
+            #self.loghandle.info(self.P_changefeatures)
+            #self.loghandle.info(self.P_deletefeatures)
+        else:
+            self.P_allfeatures = self.get_features(projectId, feature_type_id)
+            #self.loghandle.info(self.P_allfeatures)
+
+    def Get_allchangerequests(self):
+        tables = self.project["tables"]
+        projectId = self.project["id"]
+        change_request_type_id = self.getType("cr")
+        if "changes" in tables:
+            self.P_changerequests =  self.get_change_requests(projectId, change_request_type_id)
+            self.loghandle.info(self.P_changerequests)
+
+        else:
+            self.P_allchangerequests = self.get_allchangerequests(projectId, change_request_type_id)
+            self.loghandle.info(self.P_allchangerequests)
+
+
+    def Get_alldesignspecs(self):
+        tables = self.project["tables"]
+        projectId = self.project["id"]
+        designspecs_type_id = self.getType("fspec")
+        if "designspec" in tables:
+            #self.P_changerequests =  self.get_change_designspecs(projectId, change_request_type_id)
+            #self.loghandle.info(self.P_changerequests)
+            pass
+
+        else:
+            pass
+            #self.P_allchangerequests = self.get_alldesignspecs(projectId, change_request_type_id)
+            #self.loghandle.info(self.P_allchangerequests)
+
+    def update_database_tests(self):
+        existing_testplans = self.existing_testplans
         create_tests_cmd = "CREATE TABLE IF NOT EXISTS tests ( \
                             testplan_id INT, \
                             testplan_name TEXT, \
@@ -279,30 +373,38 @@ class Subprogress:
                             count INT, date TEXT) ENGINE=InnoDB DEFAULT CHARSET=utf8"
         delete_tests_cmd = "DELETE FROM tests WHERE date='{0}'".format(str(datetime.now().date()))
         select_testplanId_cmd = "SELECT testplan_id FROM tests GROUP BY testplan_id"
+
         select_testplanName_cmd = "SELECT testplan_name FROM tests WHERE testplan_id={0} LIMIT 1"
         update_testplanName_cmd = "UPDATE tests SET testplan_name='{0}' WHERE testplan_id={1}"
         update_testplanInactive_cmd = "UPDATE tests SET testplan_status='Inactive' WHERE testplan_id={0}"
         update_testplanActive_cmd = "UPDATE tests SET testplan_status='Active' WHERE testplan_id={0}"
-
+       
+        insert_testplanall_cmd = "INSERT INTO tests (testplan_id, testplan_name, testplan_status, rel, status, count, date) SELECT testplan_id, testplan_name, 'Active' as testplan_status, rel, status, count((@rn := @rn + 1)) as count, '{0}' as date FROM testcases cross join (select @rn := 0) const GROUP BY testplan_id, rel, status"
 
         self.mydb.execute(create_tests_cmd, rollback=False)
-        self.mydb.execute(delete_tests_cmd, rollback=True)
-        self.mydb.execute(select_tests_cmd, rollback=False)
+        self.mydb.execute(delete_tests_cmd, rollback=False)
+        self.mydb.execute(select_testplanId_cmd, rollback=False)
+
+        #### if testplan name or status is change, need to modify the history database data.
         rows = self.mydb.fetchall()
         tpsql = [row[0] for row in rows]
         # Check for unarchived test plans, name changes and remove deleted testplans
         for testplan in existing_testplans:
             if testplan in tpsql:
-                c.execute(select_testplanName_cmd.format(testplan), rollback=False)
-                tmp = c.fetchone()
+                self.mydb.execute(select_testplanName_cmd.format(testplan), rollback=False)
+                tmp = self.mydb.fetchone()
                 if tmp[0] != existing_testplans[testplan]["name"]:
-                    c.execute(update_testplanName_cmd.format(existing_testplans[testplan]["name"], testplan), rollback=True)
+                    self.mydb.execute(update_testplanName_cmd.format(existing_testplans[testplan]["name"], testplan), rollback=False)
                 if existing_testplans[testplan]["archived"]:
-                    c.execute(update_testplanInactive_cmd.format(testplan), rollback=True)
+                    self.mydb.execute(update_testplanInactive_cmd.format(testplan), rollback=False)
                 if not existing_testplans[testplan]["archived"]:
-                    c.execute(update_testplanActive_cmd.format(testplan), rollback=True)
+                    self.mydb.execute(update_testplanActive_cmd.format(testplan), rollback=False)
 
-        self.mydb.db_commit()        
+        self.mydb.db_commit()
+
+        self.mydb.execute(insert_testplanall_cmd, rollback=False)
+        self.loghandle.info("Insert tests table successful")
+        self.mydb.db_commit()
 
 
     def update_database_testruns(self):
@@ -329,10 +431,10 @@ class Subprogress:
                                         testcycle_id, testcycle_name, \
                                         rel, id, uniqueid, name, status, \
                                         upstream, executionDate) values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+        
         self.mydb.execute(drop_testcases_cmd, rollback=False)
-        self.loghandle.info("Drop testcases table successful")
         self.mydb.execute(create_testcases_cmd, rollback=False)
-        self.loghandle.info("Create testcases table successful")
+
         for testplanId in self.P_alltests:
             testruns = self.P_alltests[testplanId]["testruns"]
             for testrunId in testruns:
@@ -347,9 +449,139 @@ class Subprogress:
 
         self.mydb.executemany(sql_many, insert_many)
         self.mydb.db_commit()
+        self.loghandle.info("Insert testcases table successful")
+    
+    def update_database_testapproval(self):
+        testapproval = []
+        create_testapproval_cmd = "CREATE TABLE IF NOT EXISTS testapproval ( \
+                                rel TEXT, team TEXT, status TEXT, upstream TEXT, count INT, date TEXT \
+                                ) ENGINE=InnoDB DEFAULT CHARSET=utf8"
+        delete_testapproval_cmd = "DELETE FROM testapproval WHERE date='{0}'".format(str(datetime.now().date()))
+        insert_testapproval_cmd = "INSERT INTO testapproval (rel, team, status, count, date, upstream) SELECT rel, team, status, count((@rn := @rn + 1)) as count, '{0}' as date, upstream FROM alltestapproval cross join (select @rn := 0) const GROUP BY rel, team, status, upstream".format(str(datetime.now().date()))
+
+        drop_alltestapproval_cmd = "DROP TABLE IF EXISTS alltestapproval"
+        create_alltestapproval_cmd = "CREATE TABLE IF NOT EXISTS alltestapproval ( \
+                                id INT, uniqueid TEXT, name TEXT, status TEXT, rel TEXT, team TEXT, upstream TEXT \
+                                ) ENGINE=InnoDB DEFAULT CHARSET=utf8"
+        insert_alltestapproval_cmd = "INSERT INTO alltestapproval (id, uniqueid, name, status, rel, team, upstream) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+
+        for testcaseId in self.P_testcases:
+            case  =  self.P_testcases[testcaseId]
+            testapproval.append((case["id"], case["documentKey"], case["name"], case["status"], "Unspecified", case["team"], case["upstream"]))
+
+
+        self.mydb.execute(create_testapproval_cmd, rollback=False)
+
+        self.mydb.execute(drop_alltestapproval_cmd, rollback=False)
+        self.mydb.execute(create_alltestapproval_cmd, rollback=False)
+
+        self.mydb.execute(delete_testapproval_cmd, rollback=False)
+        self.mydb.db_commit()
+        self.mydb.executemany(insert_alltestapproval_cmd, testapproval)
+        self.mydb.db_commit()
+        self.mydb.execute(insert_testapproval_cmd, rollback=False)
+        self.mydb.db_commit()
 
     def Store_alltests(self):
         if self.dbenable:
             self.update_database_testruns()
+            self.update_database_tests()
+            self.update_database_testapproval()
+        else:
+            self.loghandle.info("DB is not ready!!!")
+
+    def update_database_features(self):
+        allfeatures_list = []
+        change_allfeatures_list = []
+        delete_allfeatures_list = []
+
+        create_features_cmd = "CREATE TABLE IF NOT EXISTS features (\
+                                rel TEXT, status TEXT, count INT, date TEXT) ENGINE=InnoDB DEFAULT CHARSET=utf8"
+        insert_features_cmd = "INSERT INTO features (rel, status, count, date) \
+                                SELECT rel, status, count((@rn := @rn + 1)) as count, '{0}' as date FROM allfeatures cross join (select @rn := 0) const GROUP BY rel, status".format(str(datetime.now().date()))
+        delete_features_cmd = "DELETE FROM features WHERE date='{0}'".format(str(datetime.now().date()))
+
+        create_allfeatures_cmd = "CREATE TABLE IF NOT EXISTS allfeatures (\
+                                id INT, uniqueid TEXT, name TEXT, status TEXT, rel TEXT) ENGINE=InnoDB DEFAULT CHARSET=utf8"
+        delete_allfeatures_cmd = "DELETE FROM allfeatures WHERE id=%d"
+        insert_allfeatures_cmd = "INSERT INTO allfeatures (id, uniqueid, name, status, rel) VALUES (%s, %s, %s, %s, %s)"
+        
+        self.mydb.execute(create_features_cmd, rollback=False)
+        self.mydb.execute(create_allfeatures_cmd, rollback=False)
+        self.mydb.execute(delete_features_cmd, rollback=False)
+        
+        if len(self.P_allfeatures) > 0:
+            for item in self.P_allfeatures:
+                val = (item["id"], item["documentKey"], item["name"], item["status"], "Unspecified")
+                allfeatures_list.append(val)
+        else:
+            for item in self.P_changefeatures:
+                val = (item["id"], item["documentKey"], item["name"], item["status"], "Unspecified")
+                change_allfeatures_list.append(val)
+
+            for item in self.P_deletefeatures:
+                delete_allfeatures_list.append(item["id"])
+            for item in self.P_changefeatures:
+                delete_allfeatures_list.append(item["id"])
+
+        if len(self.P_allfeatures) > 0:
+            self.mydb.executemany(insert_allfeatures_cmd, allfeatures_list)
+        else:
+            for item in delete_allfeatures_list:
+                self.mydb.execute(delete_allfeatures_cmd%(item))
+            self.mydb.executemany(insert_allfeatures_cmd, change_allfeatures_list)
+
+        self.mydb.execute(insert_features_cmd)
+        self.mydb.db_commit()
+
+
+    def Store_features(self):
+        if self.dbenable:
+            self.update_database_features()
+        else:
+            self.loghandle.info("DB is not ready!!!")
+
+    def update_database_allchange_requests(self):
+        create_changes_cmd = "CREATE TABLE IF NOT EXISTS changes ( \
+                                rel TEXT, status TEXT, priority TEXT, \
+                                requester TEXT, date TEXT, count INT) ENGINE=InnoDB DEFAULT CHARSET=utf8"
+
+        delete_changes_cmd = "DELETE FROM changes WHERE date='{0}'".format(str(datetime.now().date()))
+
+        insert_changes_cmd = "INSERT INTO changes ( \
+                                rel, status, priority, requester, date, count) \
+                                SELECT rel, status, priority, requester, '{0}' as date, count((@rn := @rn + 1)) as count FROM allchanges \
+                                cross join (select @rn := 0) const GROUP BY rel, status, priority, requester".format(str(datetime.now().date()))
+
+
+        create_allchanges_cmd = "CREATE TABLE IF NOT EXISTS allchanges ( \
+                                id INT, uniqueid TEXT, name TEXT, \
+                                status TEXT, rel TEXT, priority TEXT, \
+                                requester TEXT) ENGINE=InnoDB DEFAULT CHARSET=utf8"
+        delete_allchanges_cmd = "DELETE FROM allchanges WHERE id=%d"
+        insert_allchanges_cmd = "INSERT INTO allchanges (id, uniqueid, name, status, rel, priority, requester) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+        self.mydb.execute(create_changes_cmd, rollback=False)
+        self.mydb.execute(create_allchanges_cmd, rollback=False)
+        self.mydb.execute(delete_changes_cmd, rollback=False)
+
+        insert_many = []
+        if len(self.P_allchangerequests) >0:
+            for item in self.P_allchangerequests:
+                val = (item["id"], item["documentKey"], item["name"], item["status"], "Unspecified", item["priority"], item["req"])
+                insert_many.append(val)
+        else:
+            for item in self.P_changerequests:
+                val = (item["id"], item["documentKey"], item["name"], item["status"], "Unspecified", item["priority"], item["req"]) 
+                insert_many.append(val)
+                self.mydb.execute(delete_allchanges_cmd%(item["id"]), rollback=False)
+
+        self.mydb.executemany(insert_allchanges_cmd, insert_many)
+        self.mydb.db_commit()
+        self.mydb.execute(insert_changes_cmd, rollback=False)
+        self.mydb.db_commit()
+
+    def Store_allchange_requests(self):
+        if self.dbenable:
+            self.update_database_allchange_requests()
         else:
             self.loghandle.info("DB is not ready!!!")

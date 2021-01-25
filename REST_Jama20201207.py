@@ -55,6 +55,26 @@ def CreateFolders(G_parameter):
         os.makedirs(LOGFOLDER_PATH)
     return LOGFOLDER_PATH
 
+def get_project_tables(input_projects):
+    active_projects = input_projects
+    for project in active_projects:
+        projectdb = Mysqlconn(
+                host=G_parameter['General']['mysqlhost'],
+                user=G_parameter['General']['mysqluser'],
+                passwd=G_parameter['General']['mysqlpassword'],
+                database=str(project["id"])
+        )
+        if projectdb.connect():
+            projectdb.execute("SHOW TABLES")
+            tables = projectdb.fetchall()
+            if len(tables) >0:
+                project["tables"] = [item[0] for item in tables]
+
+            projectdb.cursor_close()
+            projectdb.db_commit()
+            projectdb.db_close()
+    return active_projects
+
 def check_database_projects(G_parameter):
     """
         Discription:
@@ -67,7 +87,7 @@ def check_database_projects(G_parameter):
             param1 - G_paramter comes from Config.ini
         Return:
             param1 - all_projects, type-list, store all projects ids,[20446....] 
-            param2 - active_projects， type-list, store all 
+            param2 - active_projects, type-list, store all 
     """
     all_projects = []
     active_projects = []
@@ -87,10 +107,11 @@ def check_database_projects(G_parameter):
         for keyy, name, webstatus, jamaId in results:
             if str(jamaId) not in all_projects:
                 mydb.execute("CREATE DATABASE IF NOT EXISTS `%d`" % jamaId)
-            active_projects.append({"keyy":keyy,"name":name,"webstatus":webstatus,"id":jamaId})
+            active_projects.append({"keyy":keyy,"name":name,"webstatus":webstatus,"id":jamaId, "tables":[]})
         mydb.cursor_close()
         mydb.db_commit()
         mydb.db_close()
+    active_projects = get_project_tables(active_projects)
 
     return all_projects, active_projects
 
@@ -110,7 +131,7 @@ def pre_deal_projects(jama_projects, active_projects, rest_api):
     jama_projects_ids = { project["id"]:num for num, project in enumerate(jama_projects) }
     ##Filter1
     mid_results = list(filter(lambda x:x["id"] in list(jama_projects_ids.keys()), active_projects))
-    ### update {status:xxx} item in jama_projects to activate_projects
+    ### update {status:xxx} item in jama_projects to active_projects
     for project in mid_results:
         num = jama_projects_ids[project["id"]]
         update_item = {"statusId":jama_projects[num]["statusId"]}
@@ -156,16 +177,24 @@ def pre_deal_projects(jama_projects, active_projects, rest_api):
 
 
 def fetch_data(project, jama_itemtypes, G_parameter, LOGFOLDER_PATH):
-    LOGGER_CONTROL = MyLogger(name = project["name"], log_name= project["name"], LOGFOLDER_PATH = LOGFOLDER_PATH)
-    LOGGER_CONTROL.disable_console()
-    LOGGER_SUB_HANDLE = LOGGER_CONTROL.getLogger()
-    LOGFILE_PATH_SUB = LOGGER_CONTROL.getlogFile()
+    try:
+        LOGGER_CONTROL = MyLogger(name = project["name"], log_name= project["name"], LOGFOLDER_PATH = LOGFOLDER_PATH)
+        LOGGER_CONTROL.disable_console()
+        LOGGER_SUB_HANDLE = LOGGER_CONTROL.getLogger()
+        LOGFILE_PATH_SUB = LOGGER_CONTROL.getlogFile()
+    except:
+        exc_type, exc_value, exc_traceback = sys.exc_info()
+        traceback.print_exc()
 
     try:
 
-        sub_process = Subprogress(project, G_parameter, LOGGER_SUB_HANDLE)
-        sub_process.Get_alltests()
-        sub_process.Store_alltests()
+        sub_process = Subprogress(project, jama_itemtypes, G_parameter, LOGGER_SUB_HANDLE)
+        #sub_process.Get_alltests()
+        #sub_process.Store_alltests()
+        #sub_process.Get_allfeatuers()
+        #sub_process.Store_features()
+        sub_process.Get_allchangerequests()
+        sub_process.Store_allchange_requests()
     except:
         exc_type, exc_value, exc_traceback = sys.exc_info()
         traceback.print_exc(file=open(LOGFILE_PATH_SUB,'a'))
@@ -194,13 +223,19 @@ if __name__ == "__main__":
                                               callback=data_reshape.getItemTypes_reshape, endless=True)
 
 
-    active_projects = [{'keyy': 'ANAC', 'name': 'Anaconda', 'webstatus': 'Active', 'id': 20434}, \
-                       {'keyy': 'PYT', 'name': 'Python', 'webstatus': 'Active', 'id': 20446}]
+    #active_projects = [{'keyy': 'ANAC', 'name': 'Anaconda', 'webstatus': 'Active', 'id': 20434}, \
+    #                   {'keyy': 'PYT', 'name': 'Python', 'webstatus': 'Active', 'id': 20446}]
     #active_projects = [{'keyy': 'ANAC', 'name': 'Anaconda', 'webstatus': 'Active', 'id': 20434}]
-    active_projects = [{'keyy': 'PYT', 'name': 'Python', 'webstatus': 'Active', 'id': 20446}]
+    #active_projects = [{'keyy': 'PYT', 'name': 'Python', 'webstatus': 'Active', 'id': 20446}]
+    for i,item in enumerate(active_projects):
+        if item["id"] == 20446:
+            test_projects = [active_projects[i]]
+    print(test_projects)
     #final_projects = pre_deal_projects(jama_projects, active_projects, rest_api)
+    final_projects = pre_deal_projects(jama_projects, test_projects, rest_api)
+    #print(final_projects)
+    #pdb.set_trace()
 
-    final_projects = active_projects
     ### start fetch data from jama for every project 
     print(list(G_parameter['JamaTeams'].keys()))
     pool = multiprocessing.Pool(processes = 1)

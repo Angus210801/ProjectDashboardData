@@ -46,27 +46,29 @@ class Mysqlconn:
 
 	def execute(self, cmd, rollback=False):
 		if self.checkdb():
-			if rollback==False:
+			# if rollback==False:
+			# 	self.cursor.execute(cmd)
+			# else:
+			try:
 				self.cursor.execute(cmd)
-			else:
-				try:
-					self.cursor.execute(cmd)
-				except Exception as e:
-					self.mydb.rollback()
-					self.Print(e)
+				self.Print(str(cmd)+":successful")
+			except Exception as e:
+				#self.mydb.rollback()
+				#self.Print(str(cmd)+":rollback")
+				self.Print(e)
 		else:
-			self.Print("execute %s failed because mydb or cursor is None!!!")
+			self.Print("execute %s failed because mydb or cursor is None!!!"%(str(cmd)))
 
 	def executemany(self, cmd, data, rollback=False):
 		if self.checkdb():
-			if rollback==False:
+			#if rollback==False:
+			#	self.cursor.executemany(cmd,data)
+			#else:
+			try:
 				self.cursor.executemany(cmd,data)
-			else:
-				try:
-					self.cursor.executemany(cmd,data)
-				except Exception as e:
-					self.mydb.rollback()
-					self.Print(e)
+			except Exception as e:
+				#self.mydb.rollback()
+				self.Print(e)
 		else:
 			self.Print("executemany %s failed because mydb or cursor is None!!!")
 
@@ -74,6 +76,12 @@ class Mysqlconn:
 		result = []
 		if self.checkdb():
 			result = self.cursor.fetchall()
+		return result
+
+	def fetchone(self):
+		result = []
+		if self.checkdb():
+			result = self.cursor.fetchone()
 		return result
 
 	def cursor_close(self):

@@ -243,3 +243,57 @@ class data_reshape:
                 }
 
         return result
+
+    @classmethod
+    def getFeatures(cls, raw_datas, rawmeta):
+        result = []
+        if len(raw_datas) == 0:
+            print("raw_datas is None")
+        else:
+            for feature in raw_datas:
+                result.append({"id":feature["id"], "name":feature["fields"]["name"], "documentKey":feature["documentKey"], "statusId":feature["fields"]["status"], "status":""})
+        return result
+
+    @classmethod
+    def getChangeFeatures(cls, raw_datas, rawmeta):
+        result = []
+        if len(raw_datas) == 0:
+            print("raw_datas is None")
+        else:
+            for feature in raw_datas:
+                result.append({"id":feature["id"], "name":feature["fields"]["name"], "documentKey":feature["documentKey"], "statusId":feature["fields"]["status"], "status":""})
+        return result
+
+    @classmethod
+    def getDeleteFeatures(cls, raw_datas, rawmeta):
+        result = []
+        if len(raw_datas) == 0:
+            print("raw_datas is None")
+        else:
+            for feature in raw_datas:
+                result.append({"id":feature["id"], "date":feature["date"], "item":feature["item"], "objectType":feature["objectType"], "action":feature["action"]})
+        return result
+
+    @classmethod
+    def getChangeRequests(cls, raw_datas, rawmeta):
+        result = []
+        if len(raw_datas) == 0:
+            print("raw_datas is None")
+        else:
+            for item in raw_datas:
+                result.append(item)
+        return result
+
+    @classmethod
+    def getAllChangeRequests(cls, raw_datas, rawmeta):
+        result = []
+        if len(raw_datas) == 0:
+            print("raw_datas is None")
+        else:
+            for item in raw_datas:
+                if "string1" in item["fields"]:
+                    req = item["fields"]["string1"]
+                else:
+                    req = "Unassigned"
+                result.append({"id":item["id"], "name":item["fields"]["name"], "documentKey":item["documentKey"], "statusId":item["fields"]["status"], "status":"","priority":item["fields"]["priority"],"req":req})
+        return result
