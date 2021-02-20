@@ -77,7 +77,7 @@ class data_reshape:
         return result
 
     @classmethod
-    def getStatus(cls, raw_datas, rawmeta):
+    def getPicklistOptions(cls, raw_datas, rawmeta):
         result = ""
         if len(raw_datas) == 0:
             print("raw_datas is None")
@@ -106,6 +106,30 @@ class data_reshape:
         else:
             for item in raw_datas:
                 result += str(item["fromItem"]) + ", "
+            result = result[:-2]
+        return result
+
+    @classmethod
+    def getDownstreamCaseParentList(cls, raw_datas, rawmeta):
+        result = []
+        if len(raw_datas) == 0:
+            print("raw_datas is None")
+        else:
+            for item in raw_datas:
+                if "TC" in item["documentKey"]: ## ensure it is testcase
+                    result.append(item["location"]["parent"]["item"]) ## store testcase parent id
+        return result
+
+
+    @classmethod
+    def getDownstreamRelationships(cls, raw_datas, rawmeta):
+        result = ""
+        if len(raw_datas) == 0:
+            print("raw_datas is None")
+        else:
+            for item in raw_datas:
+                result += str(item["toItem"]) + ", "
+            result = result[:-2]
         return result
 
     @classmethod
@@ -188,6 +212,7 @@ class data_reshape:
                     "id": test_case["id"],
                     "name":test_case_name,
                     "parentId":test_case["location"]["parent"]["item"],
+                    "sequence":test_case["location"]["sequence"],
                     "documentKey":test_case["documentKey"],
                     "globalId":test_case["globalId"],
                     "createdDate":test_case["createdDate"],
@@ -281,7 +306,11 @@ class data_reshape:
             print("raw_datas is None")
         else:
             for item in raw_datas:
-                result.append(item)
+                if "string1" in item["fields"]:
+                    req = item["fields"]["string1"]
+                else:
+                    req = "Unassigned"
+                result.append({"id":item["id"], "name":item["fields"]["name"], "documentKey":item["documentKey"], "statusId":item["fields"]["status"], "status":"","priorityId":item["fields"]["priority"],"priority":"","req":req})
         return result
 
     @classmethod
@@ -295,5 +324,120 @@ class data_reshape:
                     req = item["fields"]["string1"]
                 else:
                     req = "Unassigned"
-                result.append({"id":item["id"], "name":item["fields"]["name"], "documentKey":item["documentKey"], "statusId":item["fields"]["status"], "status":"","priority":item["fields"]["priority"],"req":req})
+                result.append({"id":item["id"], "name":item["fields"]["name"], "documentKey":item["documentKey"], "statusId":item["fields"]["status"], "status":"","priorityId":item["fields"]["priority"],"priority":"","req":req})
+        return result
+
+    @classmethod
+    def getChangeDesignspecs(cls, raw_datas, rawmeta):
+        result = []
+        if len(raw_datas) == 0:
+            print("raw_datas is None")
+        else:
+            for item in raw_datas:
+                result.append({"id":item["id"], "name":item["fields"]["name"], "documentKey":item["documentKey"], "statusId":item["fields"]["status"], "parentId":item["location"]["parent"]["item"], "status":"", "team":""})
+        return result
+
+    @classmethod
+    def getAllDesignspecs(cls, raw_datas, rawmeta):
+        result = []
+        if len(raw_datas) == 0:
+            print("raw_datas is None")
+        else:
+            for item in raw_datas:
+                result.append({"id":item["id"], "name":item["fields"]["name"], "documentKey":item["documentKey"], "statusId":item["fields"]["status"], "parentId":item["location"]["parent"]["item"], "status":"", "team":""})
+        return result
+
+    @classmethod
+    def getChangeUserStories(cls, raw_datas, rawmeta):
+        result = []
+        if len(raw_datas) == 0:
+            print("raw_datas is None")
+        else:
+            for item in raw_datas:
+                result.append(item)
+        return result
+
+    @classmethod
+    def getDeleteUserStories(cls, raw_datas, rawmeta):
+        result = []
+        if len(raw_datas) == 0:
+            print("raw_datas is None")
+        else:
+            for userstories in raw_datas:
+                result.append({"id":userstories["id"]})
+        return result       
+
+    @classmethod
+    def getAllUserStories(cls, raw_datas, rawmeta):
+        result = []
+        if len(raw_datas) == 0:
+            print("raw_datas is None")
+        else:
+            for item in raw_datas:
+                result.append({"id":item["id"], "name":item["fields"]["name"], "documentKey":item["documentKey"], "statusId":item["fields"]["status"],  "status":""})
+        return result
+
+
+    @classmethod
+    def getDeleteDefects(cls, raw_datas, rawmeta):
+        result = []
+        if len(raw_datas) == 0:
+            print("raw_datas is None")
+        else:
+            for defects in raw_datas:
+                result.append({"id":defects["id"]})
+        return result     
+
+    @classmethod
+    def getChangeDefects(cls, raw_datas, rawmeta):
+        result = []
+        if len(raw_datas) == 0:
+            print("raw_datas is None")
+        else:
+            for item in raw_datas:
+                if "jink_to_jira$89012" in item["fields"]:
+                    jira = item["fields"]["jink_to_jira$89012"]
+                result.append({"id":item["id"], "name":item["fields"]["name"], "documentKey":item["documentKey"], \
+                                "statusId":item["fields"]["status"],  "status":"", "teamId":item["fields"]["responsible_function$89012"], "team":"",\
+                                "priorityId":item["fields"]["priority"], "priority":"","upstream":"","jira":jira})
+        return result
+
+    @classmethod
+    def getAllDefects(cls, raw_datas, rawmeta):
+        result = []
+        if len(raw_datas) == 0:
+            print("raw_datas is None")
+        else:
+            for item in raw_datas:
+                if "jink_to_jira$89012" in item["fields"]:
+                    jira = item["fields"]["jink_to_jira$89012"]
+                result.append({"id":item["id"], "name":item["fields"]["name"], "documentKey":item["documentKey"], \
+                                "statusId":item["fields"]["status"],  "status":"", "teamId":item["fields"]["responsible_function$89012"], "team":"",\
+                                "priorityId":item["fields"]["priority"], "priority":"","upstream":"","jira":jira})
+        return result
+
+    @classmethod
+    def getAllRequirements(cls, raw_datas, rawmeta):
+        result = []
+        if len(raw_datas) == 0:
+            print("raw_datas is None")
+        else:
+            #teamIdlist = []
+            for item in raw_datas:
+                teamIdlist = []
+                if "verifying_teams_new$89009" in item["fields"]:
+                    teamIdlist = item["fields"]["verifying_teams_new$89009"]
+                result.append({"id":item["id"], \
+                                "name":item["fields"]["name"], \
+                                "documentKey":item["documentKey"], \
+                                "statusId":item["fields"]["status"], \
+                                "status":"", \
+                                "teamIdlist":teamIdlist, \
+                                "teamlist":[], \
+                                "upstreamrelationships":"", \
+                                "downstreamrelationships":"", \
+                                "downstreamcase_parentlist":[],\
+                                "downstreamcase_teamlist":[],
+                                "missingTC":"",
+                                "verifyTC":""})
         return result

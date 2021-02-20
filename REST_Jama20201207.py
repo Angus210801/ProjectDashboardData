@@ -10,9 +10,10 @@ import traceback
 from datetime import datetime
 from api.api_common import api_calls
 from data_reshape import data_reshape
-from Subprogress import Subprogress
 from Mysqlconn import Mysqlconn
 
+from Subprogress import JamaData
+#from Sub_savedata import UpdateDatabase
 
 import multiprocessing
 from utils import MyLogger,MyConfigParser
@@ -188,13 +189,10 @@ def fetch_data(project, jama_itemtypes, G_parameter, LOGFOLDER_PATH):
 
     try:
 
-        sub_process = Subprogress(project, jama_itemtypes, G_parameter, LOGGER_SUB_HANDLE)
-        #sub_process.Get_alltests()
-        #sub_process.Store_alltests()
-        #sub_process.Get_allfeatuers()
-        #sub_process.Store_features()
-        sub_process.Get_allchangerequests()
-        sub_process.Store_allchange_requests()
+        jamadata = JamaData(project, jama_itemtypes, G_parameter, LOGGER_SUB_HANDLE)
+        jamadata.Get_and_Save()
+        #jamadata.Save_all()
+
     except:
         exc_type, exc_value, exc_traceback = sys.exc_info()
         traceback.print_exc(file=open(LOGFILE_PATH_SUB,'a'))
@@ -231,13 +229,14 @@ if __name__ == "__main__":
         if item["id"] == 20446:
             test_projects = [active_projects[i]]
     print(test_projects)
+    print(jama_itemtypes)
     #final_projects = pre_deal_projects(jama_projects, active_projects, rest_api)
     final_projects = pre_deal_projects(jama_projects, test_projects, rest_api)
     #print(final_projects)
     #pdb.set_trace()
 
     ### start fetch data from jama for every project 
-    print(list(G_parameter['JamaTeams'].keys()))
+    print(G_parameter['JamaTeams'])
     pool = multiprocessing.Pool(processes = 1)
     for project in final_projects:
 
