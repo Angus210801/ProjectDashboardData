@@ -95,6 +95,27 @@ class JamaData:
 
         return upstreamrelationships
 
+    def get_multi_upstreamrelationships(self, testcaseId_list, P_testcases):
+        #### Get all upstream by multi-thread
+
+
+        with ThreadPoolExecutor(max_workers=int(self.Max_threads)*5) as executor:
+            obj_list = []
+            for itemId in testcaseId_list:
+                obj = executor.submit(self.rest_api.getResource,resource="items", suffix="/%s/upstreamrelationships"%(itemId), \
+                    params=None, callback=data_reshape.getMultiupstreamRelationships)
+                obj_list.append(obj)
+
+            for future in as_completed(obj_list):
+                result = future.result()
+                if len(result) != 0:
+                    #self.loghandle.info("Error:get multiupstream result is None,testplane:%s"%)
+                    P_testcases[result["testcaseId"]]["upstream"]=result["upstream"]
+
+
+
+        return upstreamrelationships
+
     def get_downstreamcase_parentlist(self, itemId):
         downstreamcase_parentlist = []
         downstreamcase_parentlist = self.rest_api.getResource(resource="items", suffix="/%s/downstreamrelated"%(itemId), \
@@ -144,7 +165,7 @@ class JamaData:
                         parentId = result["id"]
                         count = count - 1
             #self.P_caseteams[original_parentId] = team
-        self.loghandle.info(self.P_caseteams)
+        #self.loghandle.info(self.P_caseteams)
         return team
 
     def get_testplans(self, projectId):
@@ -176,7 +197,7 @@ class JamaData:
             for startAt in range(math.ceil(Totaltestruns/50)):
 
                 obj = executor.submit(self.rest_api.getResource,resource="testruns", suffix="", \
-                    params={"testPlan":testplanId,"startAt":startAt,"maxResults":50}, callback=data_reshape.getTestRunsByTestplan_sub)
+                    params={"testPlan":testplanId,"startAt":startAt*50,"maxResults":50}, callback=data_reshape.getTestRunsByTestplan_sub)
                 obj_list.append(obj)
 
             for future in as_completed(obj_list):
@@ -364,9 +385,11 @@ class JamaData:
             # else:
             #     P_testcases[testcaseId]["team"] = self.P_caseteams[parentId]
 
-        for testcaseId in testcaseId_list:
-            upstream = self.get_upstreamrelationships(testcaseId)
-            P_testcases[testcaseId]["upstream"] = upstream
+        #for testcaseId in testcaseId_list:
+        #    upstream = self.get_upstreamrelationships(testcaseId)
+        #    P_testcases[testcaseId]["upstream"] = upstream
+        self.loghandle.info(len(testcaseId_list))
+        P_testcases = self.get_multi_upstreamrelationships(testcaseId_list, P_testcases)
 
         self.P_testcases = P_testcases
         #self.loghandle.info(self.P_testcases)
@@ -407,10 +430,10 @@ class JamaData:
                             testruns[testrunId]["testgroupname"] = testgroups[testgroupId]["name"]
                             break
                         if num == len(testgrouplist)-1 and testgroupId not in testgroups:
-                            testruns[testrunId]["testgroupId"] = self.Not_Found
+                            testruns[testrunId]["testgroupId"] = 0
                             testruns[testrunId]["testgroupname"] = self.Not_Found
                 else:
-                    testruns[testrunId]["testgroupId"] = self.Not_Found
+                    testruns[testrunId]["testgroupId"] = 0
                     testruns[testrunId]["testgroupname"] = self.Not_Found
                 testruns[testrunId]["testcasename"] = self.P_testcases[testcaseId]["name"]
                 testruns[testrunId]["testcasestatus"] = self.P_testcases[testcaseId]["status"]
@@ -463,9 +486,13 @@ class JamaData:
             testcycles, testgroups, testruns, testcases = {}, {}, {}, {}
             if not existing_testplans[testplanId]["archived"]:
                 self.P_alltests[testplanId] = {"testcycles":{}, "testgroups": {}, "testruns": {}, "testcases":{}}
+                #self.loghandle.info("Get testplan name:%s id:%s testcycles"%(self.existing_testplans[testplanId]["name"], testplanId)
                 testcycles = self.get_testcycles(testplanId)
+                #self.loghandle.info("Get testplan name:%s id:%s testgroups"%(self.existing_testplans[testplanId]["name"], testplanId)
                 testgroups = self.get_testgroups(testplanId)
+                #self.loghandle.info("Get testplan name:%s id:%s testruns"%(self.existing_testplans[testplanId]["name"], testplanId)
                 testruns = self.get_testruns(testplanId)
+                #self.loghandle.info("Get testplan name:%s id:%s testcases"%(self.existing_testplans[testplanId]["name"], testplanId)
                 testcases = self.get_testcases(testplanId, testgroups)
                 
                 self.P_alltests[testplanId]["testcycles"] = testcycles

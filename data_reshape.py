@@ -99,6 +99,20 @@ class data_reshape:
         return result
 
     @classmethod
+    def getMultiupstreamRelationships(cls, raw_datas, rawmeta):
+        result = {}
+        if len(raw_datas) == 0:
+            print("raw_datas is None")
+        else:
+            upstream = ""
+            testcaseId = raw_datas[0]["toItem"]
+            result = {"testcaseId":testcaseId,"upstream":upstream}			
+            for item in raw_datas:
+                upstream += str(item["fromItem"]) + ", "
+            result["upstream"]=upstream[:-2]
+        return result
+
+    @classmethod
     def getUpstreamRelationships(cls, raw_datas, rawmeta):
         result = ""
         if len(raw_datas) == 0:
@@ -168,7 +182,6 @@ class data_reshape:
 
     @classmethod
     def getTestGroups(cls, raw_datas, rawmeta):
-        print(raw_datas)
         result = {}
         if len(raw_datas) == 0:
              print("raw_datas is None")

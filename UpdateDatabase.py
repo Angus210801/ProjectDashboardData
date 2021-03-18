@@ -17,7 +17,7 @@ class UpdateDatabase:
             host = self.G_parameter['General']['mysqlhost'],
             user = self.G_parameter['General']['mysqluser'],
             passwd = self.G_parameter['General']['mysqlpassword'],
-            database = str(self.project["id"]),
+            database = str(self.project["id"])+"test",
             loghandle = self.loghandle
         )
         self.dbenable = self.mydb.connect()
