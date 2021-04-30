@@ -76,7 +76,7 @@ def get_project_tables(input_projects):
             projectdb.db_close()
     return active_projects
 
-def check_database_projects(G_parameter):
+def check_database_projects(G_parameter, flag="ALL"):
     """
         Discription:
             1.all projects store in projects database.
@@ -102,7 +102,10 @@ def check_database_projects(G_parameter):
         mydb.execute("SHOW DATABASES")
         for project in mydb.cursor:
             all_projects.append(project[0])
-        mydb.execute("SELECT keyy, name, status, jama FROM projects WHERE status = 'Active' AND jama != 0")
+        if flag=="ALL":
+            mydb.execute("SELECT keyy, name, status, jama FROM projects WHERE jama != 0")
+        else:
+            mydb.execute("SELECT keyy, name, status, jama FROM projects WHERE status = 'Active' AND jama != 0")
 
         results = mydb.fetchall()
         for keyy, name, webstatus, jamaId in results:
@@ -212,7 +215,7 @@ if __name__ == "__main__":
 
 
     ### pre project deal.
-    all_projects, active_projects = check_database_projects(G_parameter)
+    all_projects, active_projects = check_database_projects(G_parameter, flag="ALL")
 
     rest_api = api_calls(G_parameter = G_parameter, loghandle = LOGGER_MAIN_HANDLE)
     jama_projects = rest_api.getResource(resource="projects", suffix="", params={"startAt":0,"maxResults":50}, \
@@ -225,6 +228,7 @@ if __name__ == "__main__":
     #                   {'keyy': 'PYT', 'name': 'Python', 'webstatus': 'Active', 'id': 20446}]
     #active_projects = [{'keyy': 'ANAC', 'name': 'Anaconda', 'webstatus': 'Active', 'id': 20434}]
     #active_projects = [{'keyy': 'PYT', 'name': 'Python', 'webstatus': 'Active', 'id': 20446}]
+    #print(active_projects)
     for i,item in enumerate(active_projects):
         if item["id"] == 20446:
             test_projects = [active_projects[i]]

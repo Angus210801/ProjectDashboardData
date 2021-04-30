@@ -114,7 +114,7 @@ class JamaData:
 
 
 
-        return upstreamrelationships
+        return P_testcases
 
     def get_downstreamcase_parentlist(self, itemId):
         downstreamcase_parentlist = []
@@ -446,25 +446,26 @@ class JamaData:
         self.Get_alltests()
         self.Update_db.Store_alltests(self.existing_testplans, self.P_alltests, self.P_testcases)
 
-        #self.Get_allfeatuers()
-        #self.Update_db.Store_features(self.P_changefeatures, self.P_deletefeatures, self.P_allfeatures)
+        self.Get_allfeatuers()
+        self.Update_db.Store_features(self.P_changefeatures, self.P_deletefeatures, self.P_allfeatures)
 
-        #self.Get_allchangerequests()
-        #self.Update_db.Store_allchange_requests(self.P_changerequests, self.P_allchangerequests)
+        self.Get_allchangerequests()
+        self.Update_db.Store_allchange_requests(self.P_changerequests, self.P_allchangerequests)
 
-        #self.Get_alldesignspecs()
-        #self.Update_db.Store_alldesignspecs(self.P_changedesignspecs, self.P_alldesignspecs)
+        self.Get_alldesignspecs()
+        self.Update_db.Store_alldesignspecs(self.P_changedesignspecs, self.P_alldesignspecs)
 
-        #self.Get_alluserstories()
-        #self.Update_db.Store_alluserstories(self.P_changeuserstories, self.P_deleteuserstories, self.P_alluserstories)
+        self.Get_alluserstories()
+        self.Update_db.Store_alluserstories(self.P_changeuserstories, self.P_deleteuserstories, self.P_alluserstories)
 
-        #self.Get_alldefects()
-        #self.Update_db.Store_alldefects(self.P_changedefects, self.P_deletedefects, self.P_alldefects)
+        self.Get_alldefects()
+        self.Update_db.Store_alldefects(self.P_changedefects, self.P_deletedefects, self.P_alldefects)
 
-        #self.Get_allrequirements()
-        #self.Update_db.Store_allrequirements(self.P_reqcovered, self.P_allrequirements)
+        self.Get_allrequirements()
+        self.Update_db.Store_allrequirements(self.P_reqcovered, self.P_allrequirements)
 
         #self.Get_extra_information()
+        self.Update_db.extra_information(self.project["tables"])
 
     def Get_alltests(self):
         #### Get test plans
@@ -477,10 +478,10 @@ class JamaData:
         self.loghandle.info("Get project name:%s id:%s all testplans successful!!!"%(self.project["name"], self.project["id"]))
 
         #for testplanId in [8041459,3904102]:
-        if self.project["keyy"] == "ANAC":
-            self.tmp_list = [3904102]
-        else:
-            self.tmp_list = [7372947]
+        # if self.project["keyy"] == "ANAC":
+            # self.tmp_list = [3904102]
+        # else:
+            # self.tmp_list = [7372947]
         #for testplanId in self.tmp_list:
         for testplanId in self.existing_testplans:
             testcycles, testgroups, testruns, testcases = {}, {}, {}, {}
@@ -517,6 +518,7 @@ class JamaData:
         tables = self.project["tables"]
         projectId = self.project["id"]
         feature_type_id = self.getType("feat")
+
         if "features" in tables:
             self.P_changefeatures =  self.get_change_features(projectId, feature_type_id)
             self.P_deletefeatures = self.get_delete_features(projectId,feature_type_id)
@@ -531,7 +533,7 @@ class JamaData:
         result = maindata
         for item in result:
             item["status"] = self.get_picklistoptions(item["statusId"])
-            item["priority"] = self.get_caseteam(item["priorityId"])
+            item["priority"] = self.get_picklistoptions(item["priorityId"])
         return result
 
     def Get_allchangerequests(self):
@@ -552,7 +554,7 @@ class JamaData:
         result = maindata
         for item in result:
             item["status"] = self.get_picklistoptions(item["statusId"])
-            item["team"] = self.get_caseteam(item["parentId"])
+            item["team"] = self.get_caseteam(item["parentId"], item["sequence"])
         return result
 
     def Get_alldesignspecs(self):
@@ -625,8 +627,8 @@ class JamaData:
                 req["teamlist"] = self.get_multipicklistoptions(req["teamIdlist"])
 
             if len(req["downstreamcase_parentlist"]) !=0:
-                for parentId in req["downstreamcase_parentlist"]:
-                        testcaseteam = self.get_caseteam(parentId)
+                for testcaseId, testcaseInfo in req["downstreamcase_parentlist"].items():
+                        testcaseteam = self.get_caseteam(testcaseInfo['parent'],testcaseInfo['sequence'])
                         testcaseteams.append(testcaseteam)
                 req["downstreamcase_teamlist"] = testcaseteams
 
@@ -705,13 +707,17 @@ class JamaData:
         projectId = self.project["id"]
         status_list = ["Passed", "Failed", "Incomplete testing", "Missing Test Coverage"]
 
+        print(self.P_allfeatures)
+        print(self.P_testcases)
+        print(self.P_allrequirements)		
         if self.P_allfeatures and self.P_testcases and self.P_allrequirements:
-
-            for f_iteam in self.P_allfeatures:
+            print(1)
+            for f_item in self.P_allfeatures:
                 all_reqstat = []
                 featuresId = f_item["id"]
 
                 all_req = list(filter(lambda x: x["upstreamrelationships"] == featuresId, self.P_allrequirements))
+                print(all_req)
                 for req_item in all_req:
                     statusses = []
                     requirementsId = req_item["id"]
@@ -725,7 +731,7 @@ class JamaData:
                     
                         substatus = self.getStatus(statusses,"req")
                     self.P_allrequirements_test_status.append((substatus.lower(), requirementsId))
-                    self.P_requirementsTest.append(("Unspecified", status.lower(), str(datetime.now().date())))
+                    self.P_requirementsTest.append(("Unspecified", substatus.lower(), str(datetime.now().date())))
                     all_reqstat.append(substatus)
 
                 status = self.getStatus(all_reqstat, "feat")
@@ -733,10 +739,18 @@ class JamaData:
                 self.P_allfeatures_test_status.append((status.lower(), featuresId))
                 self.P_featurestest.append(("Unspecified", status.lower(), str(datetime.now().date())))
 
+        print(self.P_allfeatures_test_status)
+        print(self.P_allrequirements_test_status)
+        print(self.P_featurestest)
+        print(self.P_requirementsTest)
 
         for item in status_list:
             status = item.upper()
-            count1 = sum([ 1 if feat[0]==status else 0 for feat in self.P_featurestest])
+            count1 = sum([ 1 if feat[1]==status else 0 for feat in self.P_featurestest])
             self.P_c_featurestest.append(("Unspecified",status, count1, str(datetime.now().date())))
-            count2 = sum([ 1 if req[0]==status else 0 for req in self.P_requirementsTest])
+            count2 = sum([ 1 if req[1]==status else 0 for req in self.P_requirementsTest])
             self.P_c_requirementsTest.append(("Unspecified",status, count2, str(datetime.now().date())))
+
+
+        print(self.P_c_featurestest)
+        print(self.P_c_requirementsTest)

@@ -89,7 +89,8 @@ class data_reshape:
     def getParent(cls, raw_datas, rawmeta):
         result = {}
         if len(raw_datas) == 0:
-            print("raw_datas is None")
+            #print("raw_datas is None")
+            pass
         else:
             result = {
                         "id":raw_datas["id"],
@@ -125,13 +126,18 @@ class data_reshape:
 
     @classmethod
     def getDownstreamCaseParentList(cls, raw_datas, rawmeta):
-        result = []
+        #result = []
+        result = {}
         if len(raw_datas) == 0:
             print("raw_datas is None")
         else:
             for item in raw_datas:
                 if "TC" in item["documentKey"]: ## ensure it is testcase
-                    result.append(item["location"]["parent"]["item"]) ## store testcase parent id
+                    result[item["id"]] = {
+					    "parent":item["location"]["parent"]["item"],
+					    "sequence":item["location"]["sequence"]
+					
+					}  ## store testcase parent id
         return result
 
 
@@ -357,7 +363,7 @@ class data_reshape:
             print("raw_datas is None")
         else:
             for item in raw_datas:
-                result.append({"id":item["id"], "name":item["fields"]["name"], "documentKey":item["documentKey"], "statusId":item["fields"]["status"], "parentId":item["location"]["parent"]["item"], "status":"", "team":""})
+                result.append({"id":item["id"], "name":item["fields"]["name"], "documentKey":item["documentKey"], "statusId":item["fields"]["status"], "parentId":item["location"]["parent"]["item"], "sequence":item["location"]["sequence"],"status":"", "team":""})
         return result
 
     @classmethod
@@ -449,7 +455,7 @@ class data_reshape:
                                 "teamlist":[], \
                                 "upstreamrelationships":"", \
                                 "downstreamrelationships":"", \
-                                "downstreamcase_parentlist":[],\
+                                "downstreamcase_parentlist":{},\
                                 "downstreamcase_teamlist":[],
                                 "missingTC":"",
                                 "verifyTC":""})
