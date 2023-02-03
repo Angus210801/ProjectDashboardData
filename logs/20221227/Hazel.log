@@ -1,0 +1,63 @@
+2022-12-27 04:59:20 I Hazel Print           "Connet 20564 successfully!!!"
+2022-12-27 04:59:20 I Hazel Get_alltests    "Get project name:Hazel id:20564 all testplans"
+2022-12-27 04:59:22 I Hazel Get_alltests    "{9228382: {'id': 9228382, 'name': 'Audio Test Plan', 'archived': False, 'index': '9228382:Audio Test Plan'}, 8958160: {'id': 8958160, 'name': 'ESW Test Plan Hazel', 'archived': False, 'index': '8958160:ESW Test Plan Hazel'}, 8727731: {'id': 8727731, 'name': 'HW DVT Plan', 'archived': True, 'index': '8727731:HW DVT Plan'}, 8759587: {'id': 8759587, 'name': 'HW DVT Plan', 'archived': False, 'index': '8759587:HW DVT Plan'}, 9058329: {'id': 9058329, 'name': 'Packaging Verification Test plan', 'archived': False, 'index': '9058329:Packaging Verification Test plan'}, 10331347: {'id': 10331347, 'name': 'Product Maintenance test plan', 'archived': False, 'index': '10331347:Product Maintenance test plan'}, 8609683: {'id': 8609683, 'name': 'Product Verification Test Plan', 'archived': False, 'index': '8609683:Product Verification Test Plan'}, 9706640: {'id': 9706640, 'name': 'Regulatory Compliance  Plan', 'archived': False, 'index': '9706640:Regulatory Compliance  Plan'}, 9538101: {'id': 9538101, 'name': 'RF range test', 'archived': False, 'index': '9538101:RF range test'}}"
+2022-12-27 04:59:23 I Hazel Get_alltests    "Get project name:Hazel id:20564 all testplans successful!!!"
+2022-12-27 05:07:10 I Hazel tidy_alltestcas "1249"
+2022-12-27 05:16:54 I Hazel Print           "DROP TABLE IF EXISTS testcases:successful"
+2022-12-27 05:16:54 I Hazel Print           "CREATE TABLE IF NOT EXISTS testcases (                             testplan_id INT,                             testplan_name TEXT,                             testgroup_id INT,                             testgroup_name TEXT,                             testcycle_id INT,                             testcycle_name TEXT,                             rel TEXT,                             id INT,                             uniqueid TEXT,                             name TEXT,                             status TEXT,                             upstream TEXT,                             downstream TEXT,                             executionDate TEXT) ENGINE=InnoDB DEFAULT CHARSET=utf8:successful"
+2022-12-27 05:16:54 I Hazel update_database "Insert testcases table successful"
+2022-12-27 05:16:54 I Hazel Print           "CREATE TABLE IF NOT EXISTS tests (                             testplan_id INT,                             testplan_name TEXT,                             testplan_status TEXT,                             rel TEXT, status TEXT,                             count INT, date TEXT) ENGINE=InnoDB DEFAULT CHARSET=utf8:successful"
+2022-12-27 05:16:54 I Hazel Print           "DELETE FROM tests WHERE date='2022-12-27':successful"
+2022-12-27 05:16:54 I Hazel Print           "SELECT testplan_id FROM tests GROUP BY testplan_id:successful"
+2022-12-27 05:16:54 I Hazel Print           "SELECT testplan_name FROM tests WHERE testplan_id=9228382 LIMIT 1:successful"
+2022-12-27 05:16:54 I Hazel Print           "UPDATE tests SET testplan_status='Active' WHERE testplan_id=9228382:successful"
+2022-12-27 05:16:54 I Hazel Print           "SELECT testplan_name FROM tests WHERE testplan_id=8958160 LIMIT 1:successful"
+2022-12-27 05:16:54 I Hazel Print           "UPDATE tests SET testplan_status='Active' WHERE testplan_id=8958160:successful"
+2022-12-27 05:16:54 I Hazel Print           "SELECT testplan_name FROM tests WHERE testplan_id=8759587 LIMIT 1:successful"
+2022-12-27 05:16:54 I Hazel Print           "UPDATE tests SET testplan_status='Active' WHERE testplan_id=8759587:successful"
+2022-12-27 05:16:54 I Hazel Print           "SELECT testplan_name FROM tests WHERE testplan_id=8609683 LIMIT 1:successful"
+2022-12-27 05:16:54 I Hazel Print           "UPDATE tests SET testplan_status='Active' WHERE testplan_id=8609683:successful"
+2022-12-27 05:16:54 I Hazel Print           "SELECT testplan_name FROM tests WHERE testplan_id=9706640 LIMIT 1:successful"
+2022-12-27 05:16:54 I Hazel Print           "UPDATE tests SET testplan_status='Active' WHERE testplan_id=9706640:successful"
+2022-12-27 05:16:54 I Hazel Print           "SELECT testplan_name FROM tests WHERE testplan_id=9538101 LIMIT 1:successful"
+2022-12-27 05:16:54 I Hazel Print           "UPDATE tests SET testplan_status='Active' WHERE testplan_id=9538101:successful"
+2022-12-27 05:16:54 I Hazel Print           "INSERT INTO tests (testplan_id, testplan_name, testplan_status, rel, status, count, date) SELECT testplan_id, testplan_name, 'Active' as testplan_status, rel, status, count((@rn := @rn + 1)) as count, '2022-12-27' as date FROM testcases cross join (select @rn := 0) const GROUP BY testplan_id, rel, status:successful"
+2022-12-27 05:16:54 I Hazel update_database "Insert tests table successful"
+2022-12-27 05:16:54 I Hazel Print           "CREATE TABLE IF NOT EXISTS testapproval (                                 rel TEXT, team TEXT, status TEXT, upstream TEXT, count INT, date TEXT                                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8:successful"
+2022-12-27 05:16:54 I Hazel Print           "DROP TABLE IF EXISTS alltestapproval:successful"
+2022-12-27 05:16:54 I Hazel Print           "CREATE TABLE IF NOT EXISTS alltestapproval (                                 id INT, uniqueid TEXT, name TEXT, status TEXT, rel TEXT, team TEXT, upstream TEXT                                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8:successful"
+2022-12-27 05:16:54 I Hazel Print           "DELETE FROM testapproval WHERE date='2022-12-27':successful"
+2022-12-27 05:16:54 I Hazel Print           "INSERT INTO testapproval (rel, team, status, count, date, upstream) SELECT rel, team, status, count((@rn := @rn + 1)) as count, '2022-12-27' as date, upstream FROM alltestapproval cross join (select @rn := 0) const GROUP BY rel, team, status, upstream:successful"
+2022-12-27 05:17:06 I Hazel Get_allfeatuers "[]"
+2022-12-27 05:17:06 I Hazel Print           "CREATE TABLE IF NOT EXISTS features (                                rel TEXT, status TEXT, count INT, date TEXT) ENGINE=InnoDB DEFAULT CHARSET=utf8:successful"
+2022-12-27 05:17:06 I Hazel Print           "CREATE TABLE IF NOT EXISTS allfeatures (                                id INT, uniqueid TEXT, name TEXT, status TEXT, rel TEXT,test_status TEXT) ENGINE=InnoDB DEFAULT CHARSET=utf8:successful"
+2022-12-27 05:17:06 I Hazel Print           "DELETE FROM features WHERE date='2022-12-27':successful"
+2022-12-27 05:17:06 I Hazel Print           "DELETE FROM allfeatures WHERE id=17576711:successful"
+2022-12-27 05:17:06 I Hazel Print           "DELETE FROM allfeatures WHERE id=17576707:successful"
+2022-12-27 05:17:06 I Hazel Print           "DELETE FROM allfeatures WHERE id=17078494:successful"
+2022-12-27 05:17:06 I Hazel Print           "DELETE FROM allfeatures WHERE id=16914615:successful"
+2022-12-27 05:17:06 I Hazel Print           "DELETE FROM allfeatures WHERE id=16914612:successful"
+2022-12-27 05:17:06 I Hazel Print           "DELETE FROM allfeatures WHERE id=16914609:successful"
+2022-12-27 05:17:06 I Hazel Print           "DELETE FROM allfeatures WHERE id=16747896:successful"
+2022-12-27 05:17:06 I Hazel Print           "DELETE FROM allfeatures WHERE id=16740241:successful"
+2022-12-27 05:17:06 I Hazel Print           "DELETE FROM allfeatures WHERE id=16740211:successful"
+2022-12-27 05:17:06 I Hazel Print           "DELETE FROM allfeatures WHERE id=16699922:successful"
+2022-12-27 05:17:06 I Hazel Print           "DELETE FROM allfeatures WHERE id=16699920:successful"
+2022-12-27 05:17:06 I Hazel Print           "DELETE FROM allfeatures WHERE id=15882040:successful"
+2022-12-27 05:17:06 I Hazel Print           "DELETE FROM allfeatures WHERE id=15810503:successful"
+2022-12-27 05:17:06 I Hazel Print           "DELETE FROM allfeatures WHERE id=15810493:successful"
+2022-12-27 05:17:06 I Hazel Print           "INSERT INTO features (rel, status, count, date)                                 SELECT rel, status, count((@rn := @rn + 1)) as count, '2022-12-27' as date FROM allfeatures cross join (select @rn := 0) const GROUP BY rel, status:successful"
+Traceback (most recent call last):
+  File "E:\New Jira_Jama\Jama_jira_script\REST_Jama20201207.py", line 196, in fetch_data
+    jamadata.Get_and_Save()
+  File "E:\New Jira_Jama\Jama_jira_script\Subprogress.py", line 452, in Get_and_Save
+    self.Get_allchangerequests()
+  File "E:\New Jira_Jama\Jama_jira_script\Subprogress.py", line 544, in Get_allchangerequests
+    self.P_changerequests =  self.get_change_requests(projectId, change_request_type_id)
+  File "E:\New Jira_Jama\Jama_jira_script\Subprogress.py", line 255, in get_change_requests
+    callback=data_reshape.getChangeRequests, endless=True)
+  File "E:\New Jira_Jama\Jama_jira_script\api\api_common.py", line 179, in getResource
+    return callback(rawdatas,rawmeta)
+  File "E:\New Jira_Jama\Jama_jira_script\data_reshape.py", line 340, in getChangeRequests
+    result.append({"id":item["id"], "name":item["fields"]["name"], "documentKey":item["documentKey"], "statusId":item["fields"]["status"], "status":"","priorityId":item["fields"]["priority"],"priority":"","req":req})
+KeyError: 'priority'

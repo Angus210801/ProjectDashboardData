@@ -226,7 +226,15 @@ class data_reshape:
                     statusId = test_case["fields"]["test_case_approval_status$89011"]
                 else:
                     statusId = ""
-
+                if "testCaseStatus" in test_case["fields"]:
+                    testCaseStatus = test_case["fields"]["testCaseStatus"]
+                else:
+                    testCaseStatus = ""
+               
+                if "testRunResults" in test_case["fields"]:
+                    testRunResults = test_case["fields"]["testRunResults"]
+                else:
+                    testRunResults = ""
                 result[test_case["id"]] = {
                     "id": test_case["id"],
                     "name":test_case_name,
@@ -237,8 +245,8 @@ class data_reshape:
                     "createdDate":test_case["createdDate"],
                     "modifiedDate":test_case["modifiedDate"],
                     "lastActivityDate":test_case["lastActivityDate"],
-                    "testCaseStatus":test_case["fields"]["testCaseStatus"],
-                    "testRunResults":test_case["fields"]["testRunResults"],
+                    "testCaseStatus":testCaseStatus,
+                    "testRunResults":testRunResults,
                     "statusId":statusId,
                     ###these information need to fecth data from jama again 
                     "status":"",
@@ -353,7 +361,7 @@ class data_reshape:
             print("raw_datas is None")
         else:
             for item in raw_datas:
-                result.append({"id":item["id"], "name":item["fields"]["name"], "documentKey":item["documentKey"], "statusId":item["fields"]["status"], "parentId":item["location"]["parent"]["item"], "status":"", "team":""})
+                result.append({"id":item["id"], "name":item["fields"]["name"], "documentKey":item["documentKey"], "statusId":item["fields"]["status"], "parentId":item["location"]["parent"]["item"], "sequence":item["location"]["sequence"],"status":"", "team":""})
         return result
 
     @classmethod

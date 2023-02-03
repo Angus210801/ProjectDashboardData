@@ -87,7 +87,8 @@ class api_calls:
                 #retry = retry + 1
                 #response = None
         if response is None and retry_count == self.Retry:
-            self.Print("Can't url:%s get response, network error or parameter error, retry count = %s"%(url, str(self.Retry)),flag='Error')
+            pass
+            #self.Print("Can't url:%s get response, network error or parameter error, retry count = %s"%(url, str(self.Retry)),flag='Error')
         #print(url)
         return response
 
@@ -141,7 +142,7 @@ class api_calls:
                 url = self.combine(purl, params)
             else:
                 url = purl
-            self.Print(url+":start")
+            #self.Print(url+":start")
             response = self.httpget(url, auth=(self.username, self.password))
             if response is not None:
                 json_response = json.loads(response.text)
@@ -150,7 +151,7 @@ class api_calls:
                     rawdatas = json_response["data"]
                 if "meta" in json_response:
                     rawmeta = json_response["meta"]
-                self.Print(url+":succesful")
+                #self.Print(url+":succesful")
         else:
             while True:
                 url = self.combine(purl, params)
@@ -200,7 +201,7 @@ class api_calls:
                 # Processing data side of response
                 json_response_data = json_response["data"]
                 rawdatas = rawdatas + json_response_data
-                self.Print(url+":succesful")
+                #self.Print(url+":succesful")
                 if startIndex >= totalResults:
                     break
 

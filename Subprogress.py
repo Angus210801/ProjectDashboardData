@@ -464,7 +464,7 @@ class JamaData:
         self.Get_allrequirements()
         self.Update_db.Store_allrequirements(self.P_reqcovered, self.P_allrequirements)
 
-        #self.Get_extra_information()
+        self.Get_extra_information()
         self.Update_db.extra_information(self.project["tables"])
 
     def Get_alltests(self):
@@ -487,7 +487,7 @@ class JamaData:
             testcycles, testgroups, testruns, testcases = {}, {}, {}, {}
             if not existing_testplans[testplanId]["archived"]:
                 self.P_alltests[testplanId] = {"testcycles":{}, "testgroups": {}, "testruns": {}, "testcases":{}}
-                #self.loghandle.info("Get testplan name:%s id:%s testcycles"%(self.existing_testplans[testplanId]["name"], testplanId)
+                #self.loghandle.info("Get testplan name:%s id:%s testcycles"%(self.existing_testplans[testplanId]["name"], testplanId))
                 testcycles = self.get_testcycles(testplanId)
                 #self.loghandle.info("Get testplan name:%s id:%s testgroups"%(self.existing_testplans[testplanId]["name"], testplanId)
                 testgroups = self.get_testgroups(testplanId)
@@ -668,8 +668,8 @@ class JamaData:
         requirements_type_id = self.getType("req")
         self.P_allrequirements =  self.get_allrequirements(projectId, requirements_type_id)
         self.P_allrequirements = self.get_futher_information_requirements(self.P_allrequirements)
-        self.loghandle.info(self.P_allrequirements)
-        self.loghandle.info(self.P_reqcovered)
+        #self.loghandle.info(self.P_allrequirements)
+        #self.loghandle.info(self.P_reqcovered)
 
 
     # Gets the status of the item depending on the type
@@ -707,9 +707,9 @@ class JamaData:
         projectId = self.project["id"]
         status_list = ["Passed", "Failed", "Incomplete testing", "Missing Test Coverage"]
 
-        print(self.P_allfeatures)
-        print(self.P_testcases)
-        print(self.P_allrequirements)		
+        #print(self.P_allfeatures)
+        #print(self.P_testcases)
+        #print(self.P_allrequirements)		
         if self.P_allfeatures and self.P_testcases and self.P_allrequirements:
             print(1)
             for f_item in self.P_allfeatures:
@@ -739,10 +739,10 @@ class JamaData:
                 self.P_allfeatures_test_status.append((status.lower(), featuresId))
                 self.P_featurestest.append(("Unspecified", status.lower(), str(datetime.now().date())))
 
-        print(self.P_allfeatures_test_status)
-        print(self.P_allrequirements_test_status)
-        print(self.P_featurestest)
-        print(self.P_requirementsTest)
+        #print(self.P_allfeatures_test_status)
+        #print(self.P_allrequirements_test_status)
+        #print(self.P_featurestest)
+        #print(self.P_requirementsTest)
 
         for item in status_list:
             status = item.upper()
@@ -752,5 +752,5 @@ class JamaData:
             self.P_c_requirementsTest.append(("Unspecified",status, count2, str(datetime.now().date())))
 
 
-        print(self.P_c_featurestest)
-        print(self.P_c_requirementsTest)
+        #print(self.P_c_featurestest)
+        #print(self.P_c_requirementsTest)

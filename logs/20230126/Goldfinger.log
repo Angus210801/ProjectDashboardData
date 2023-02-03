@@ -1,0 +1,26 @@
+2023-01-26 09:41:09 I Goldf Print           "Connet 20611 successfully!!!"
+2023-01-26 09:41:09 I Goldf Get_alltests    "Get project name:Goldfinger id:20611 all testplans"
+2023-01-26 09:41:11 I Goldf Get_alltests    "{9889773: {'id': 9889773, 'name': 'Audio DVT test plan', 'archived': False, 'index': '9889773:Audio DVT test plan'}, 10063946: {'id': 10063946, 'name': 'ESW Test Plan', 'archived': False, 'index': '10063946:ESW Test Plan'}, 10345084: {'id': 10345084, 'name': 'HW Test Plan', 'archived': False, 'index': '10345084:HW Test Plan'}, 10447358: {'id': 10447358, 'name': 'MT Test', 'archived': False, 'index': '10447358:MT Test'}, 9733678: {'id': 9733678, 'name': 'Product Verification Test Plan', 'archived': False, 'index': '9733678:Product Verification Test Plan'}}"
+2023-01-26 09:41:11 I Goldf Get_alltests    "Get project name:Goldfinger id:20611 all testplans successful!!!"
+2023-01-26 09:48:11 I Goldf tidy_alltestcas "567"
+2023-01-26 09:49:20 I Goldf Print           "DROP TABLE IF EXISTS testcases:successful"
+2023-01-26 09:49:20 I Goldf Print           "1813 (HY000): Tablespace for table '`20611`.`testcases`' exists. Please DISCARD the tablespace before IMPORT"
+2023-01-26 09:49:20 I Goldf Print           "1146 (42S02): Table '20611.testcases' doesn't exist"
+2023-01-26 09:49:20 I Goldf update_database "Insert testcases table successful"
+2023-01-26 09:49:20 I Goldf Print           "CREATE TABLE IF NOT EXISTS tests (                             testplan_id INT,                             testplan_name TEXT,                             testplan_status TEXT,                             rel TEXT, status TEXT,                             count INT, date TEXT) ENGINE=InnoDB DEFAULT CHARSET=utf8:successful"
+2023-01-26 09:49:20 I Goldf Print           "1932 (42S02): Table '20611.tests' doesn't exist in engine"
+2023-01-26 09:49:20 I Goldf Print           "1932 (42S02): Table '20611.tests' doesn't exist in engine"
+Traceback (most recent call last):
+  File "E:\New Jira_Jama\Jama_jira_script\REST_Jama20201207.py", line 196, in fetch_data
+    jamadata.Get_and_Save()
+  File "E:\New Jira_Jama\Jama_jira_script\Subprogress.py", line 447, in Get_and_Save
+    self.Update_db.Store_alltests(self.existing_testplans, self.P_alltests, self.P_testcases)
+  File "E:\New Jira_Jama\Jama_jira_script\UpdateDatabase.py", line 29, in Store_alltests
+    self.update_database_tests(existing_testplans)
+  File "E:\New Jira_Jama\Jama_jira_script\UpdateDatabase.py", line 93, in update_database_tests
+    rows = self.mydb.fetchall()
+  File "E:\New Jira_Jama\Jama_jira_script\Mysqlconn.py", line 78, in fetchall
+    result = self.cursor.fetchall()
+  File "C:\Python37-32\lib\site-packages\mysql\connector\cursor.py", line 895, in fetchall
+    raise errors.InterfaceError("No result set to fetch from.")
+mysql.connector.errors.InterfaceError: No result set to fetch from.

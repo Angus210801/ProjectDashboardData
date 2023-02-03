@@ -202,7 +202,9 @@ def fetch_data(project, jama_itemtypes, G_parameter, LOGFOLDER_PATH):
 
 
 if __name__ == "__main__":
-
+    test_projects = []
+    # maintainlist=[20630]
+    maintainlist = [20611,20612,20630,20400,20434, 20392, 20402, 20360, 20400, 20318, 20287, 20345, 20403, 20396, 20393, 20392, 20446, 20417, 20317, 20423, 20315, 20425, 20508, 20463, 20525, 20525, 20493, 20538, 20557, 20558, 20560, 20565, 20568, 20550, 20603, 20564, 20547, 20562, 20563, 20597, 20596, 20602, 20606, 20587, 20620, 20625, 20624]
     jama_projects, jama_itemtypes = [],[]
     ### prepare phase
     G_parameter = read_config_file()
@@ -230,29 +232,23 @@ if __name__ == "__main__":
     #active_projects = [{'keyy': 'PYT', 'name': 'Python', 'webstatus': 'Active', 'id': 20446}]
     #print(active_projects)
     for i,item in enumerate(active_projects):
-        if item["id"] == 20446:
-            test_projects = [active_projects[i]]
-    print(test_projects)
-    print(jama_itemtypes)
+        if item["id"] in maintainlist:
+            # if item["id"]==20612:
+            test_projects = test_projects+[active_projects[i]]
+    #print(test_projects)
+    #print(jama_itemtypes)
     #final_projects = pre_deal_projects(jama_projects, active_projects, rest_api)
     final_projects = pre_deal_projects(jama_projects, test_projects, rest_api)
     #print(final_projects)
     #pdb.set_trace()
 
     ### start fetch data from jama for every project 
-    print(G_parameter['JamaTeams'])
-    pool = multiprocessing.Pool(processes = 1)
+    #print(G_parameter['JamaTeams'])
+    pool = multiprocessing.Pool(processes = 10)
     for project in final_projects:
-
         pool.apply_async(func=fetch_data, args=(project, jama_itemtypes , G_parameter,LOGFOLDER_PATH,))
 
     pool.close()
     pool.join()
     pool.terminate()
     pool.close()
-
-
-
-
-
-

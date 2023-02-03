@@ -1,0 +1,4 @@
+2023-01-20 05:10:38 I Moonr Print           "Connet 20612 successfully!!!"
+2023-01-20 05:10:38 I Moonr Get_alltests    "Get project name:Moonraker id:20612 all testplans"
+2023-01-20 05:10:39 I Moonr Get_alltests    "{10114678: {'id': 10114678, 'name': 'Audio DVT test plan', 'archived': False, 'index': '10114678:Audio DVT test plan'}, 10085083: {'id': 10085083, 'name': 'ESW Test Plan', 'archived': False, 'index': '10085083:ESW Test Plan'}, 10379857: {'id': 10379857, 'name': 'Product Verification Test Plan', 'archived': False, 'index': '10379857:Product Verification Test Plan'}, 10065904: {'id': 10065904, 'name': 'Regulatory Compliance Plan ', 'archived': False, 'index': '10065904:Regulatory Compliance Plan '}}"
+2023-01-20 05:10:39 I Moonr Get_alltests    "Get project name:Moonraker id:20612 all testplans successful!!!"

@@ -1,0 +1,37 @@
+2023-01-26 04:59:20 I Anaco Print           "Connet 20434 successfully!!!"
+2023-01-26 04:59:20 I Anaco Get_alltests    "Get project name:Anaconda id:20434 all testplans"
+2023-01-26 04:59:22 I Anaco Get_alltests    "{8703112: {'id': 8703112, 'name': 'Anaconda - Functional Non-Functional and AI Video Quality 3DNR  IZ Test Plan VP2', 'archived': False, 'index': '8703112:Anaconda - Functional Non-Functional and AI Video Quality 3DNR  IZ Test Plan VP2'}, 8703669: {'id': 8703669, 'name': 'Anaconda - IOP and Reliability Test Plan VP2', 'archived': False, 'index': '8703669:Anaconda - IOP and Reliability Test Plan VP2'}, 9348642: {'id': 9348642, 'name': 'Anaconda New Hardware verification', 'archived': False, 'index': '9348642:Anaconda New Hardware verification'}, 8041459: {'id': 8041459, 'name': 'Anaconda_3m cable TT', 'archived': False, 'index': '8041459:Anaconda_3m cable TT'}, 5285136: {'id': 5285136, 'name': 'demo', 'archived': True, 'index': '5285136:demo'}, 7315521: {'id': 7315521, 'name': 'Duplicate of White Board application test plan', 'archived': True, 'index': '7315521:Duplicate of White Board application test plan'}, 4251146: {'id': 4251146, 'name': 'ESW Test Plan', 'archived': False, 'index': '4251146:ESW Test Plan'}, 6033876: {'id': 6033876, 'name': 'ESW Test Plan VP1', 'archived': False, 'index': '6033876:ESW Test Plan VP1'}, 7784607: {'id': 7784607, 'name': 'Extension cable  Anaconda Test plan', 'archived': False, 'index': '7784607:Extension cable  Anaconda Test plan'}, 9232508: {'id': 9232508, 'name': 'Panacast 1.8m C-C cableTwo highspeed pairs HW Test', 'archived': False, 'index': '9232508:Panacast 1.8m C-C cableTwo highspeed pairs HW Test'}, 8617595: {'id': 8617595, 'name': 'Panacast 1.8m cable packaging test plan', 'archived': False, 'index': '8617595:Panacast 1.8m cable packaging test plan'}, 8559484: {'id': 8559484, 'name': 'Panacast 1.8m cable Product Verification Test Plan', 'archived': False, 'index': '8559484:Panacast 1.8m cable Product Verification Test Plan'}, 7315557: {'id': 7315557, 'name': 'PanaCast Vision With Deep Zoom Based Whiteboard', 'archived': False, 'index': '7315557:PanaCast Vision With Deep Zoom Based Whiteboard'}, 5242308: {'id': 5242308, 'name': 'Product Maintenance test plan', 'archived': False, 'index': '5242308:Product Maintenance test plan'}, 3904102: {'id': 3904102, 'name': 'Product Verification Test Plan', 'archived': False, 'index': '3904102:Product Verification Test Plan'}, 3898513: {'id': 3898513, 'name': 'Regulatory Compliance Test Plan', 'archived': False, 'index': '3898513:Regulatory Compliance Test Plan'}, 8609459: {'id': 8609459, 'name': 'Test Plan - Panacast 1.8m Cable ', 'archived': False, 'index': '8609459:Test Plan - Panacast 1.8m Cable '}, 3865926: {'id': 3865926, 'name': 'Test plan - US production', 'archived': False, 'index': '3865926:Test plan - US production'}, 3865929: {'id': 3865929, 'name': 'Test plan - v-tech production', 'archived': False, 'index': '3865929:Test plan - v-tech production'}, 9232579: {'id': 9232579, 'name': 'USB3.0 1.8m C-C CableFour high speed pairs HW Test', 'archived': False, 'index': '9232579:USB3.0 1.8m C-C CableFour high speed pairs HW Test'}, 9233875: {'id': 9233875, 'name': 'USB3.0 3.0m C-A CableFour high speed pairs HW Test', 'archived': False, 'index': '9233875:USB3.0 3.0m C-A CableFour high speed pairs HW Test'}, 4989864: {'id': 4989864, 'name': 'White Board application test plan', 'archived': False, 'index': '4989864:White Board application test plan'}}"
+2023-01-26 04:59:22 I Anaco Get_alltests    "Get project name:Anaconda id:20434 all testplans successful!!!"
+2023-01-26 14:13:57 I Anaco tidy_alltestcas "9880"
+2023-01-26 14:36:00 I Anaco Print           "2055: Lost connection to MySQL server at '127.0.0.1:3306', system error: 10053 An established connection was aborted by the software in your host machine"
+2023-01-26 14:36:00 I Anaco Print           "2055: Lost connection to MySQL server at '127.0.0.1:3306', system error: 10053 An established connection was aborted by the software in your host machine"
+2023-01-26 14:36:01 I Anaco Print           "2055: Lost connection to MySQL server at '127.0.0.1:3306', system error: 10053 An established connection was aborted by the software in your host machine"
+Traceback (most recent call last):
+  File "C:\Python37-32\lib\site-packages\mysql\connector\network.py", line 148, in send_plain
+    self.sock.sendall(packet)
+ConnectionAbortedError: [WinError 10053] An established connection was aborted by the software in your host machine
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "E:\New Jira_Jama\Jama_jira_script\REST_Jama20201207.py", line 196, in fetch_data
+    jamadata.Get_and_Save()
+  File "E:\New Jira_Jama\Jama_jira_script\Subprogress.py", line 447, in Get_and_Save
+    self.Update_db.Store_alltests(self.existing_testplans, self.P_alltests, self.P_testcases)
+  File "E:\New Jira_Jama\Jama_jira_script\UpdateDatabase.py", line 28, in Store_alltests
+    self.update_database_testruns(P_alltests)
+  File "E:\New Jira_Jama\Jama_jira_script\UpdateDatabase.py", line 178, in update_database_testruns
+    self.mydb.db_commit()
+  File "E:\New Jira_Jama\Jama_jira_script\Mysqlconn.py", line 93, in db_commit
+    self.mydb.commit()
+  File "C:\Python37-32\lib\site-packages\mysql\connector\connection.py", line 951, in commit
+    self._execute_query("COMMIT")
+  File "C:\Python37-32\lib\site-packages\mysql\connector\connection.py", line 970, in _execute_query
+    self.cmd_query(query)
+  File "C:\Python37-32\lib\site-packages\mysql\connector\connection.py", line 590, in cmd_query
+    result = self._handle_result(self._send_cmd(ServerCmd.QUERY, query))
+  File "C:\Python37-32\lib\site-packages\mysql\connector\connection.py", line 344, in _send_cmd
+    packet_number, compressed_packet_number)
+  File "C:\Python37-32\lib\site-packages\mysql\connector\network.py", line 151, in send_plain
+    errno=2055, values=(self.get_address(), _strioerror(err)))
+mysql.connector.errors.OperationalError: 2055: Lost connection to MySQL server at '127.0.0.1:3306', system error: 10053 An established connection was aborted by the software in your host machine

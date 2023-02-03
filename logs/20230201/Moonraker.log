@@ -1,0 +1,57 @@
+2023-02-01 09:47:33 I Moonr Print           "Connet 20612 successfully!!!"
+2023-02-01 09:47:33 I Moonr Get_alltests    "Get project name:Moonraker id:20612 all testplans"
+2023-02-01 09:47:35 I Moonr Get_alltests    "{10114678: {'id': 10114678, 'name': 'Audio DVT test plan', 'archived': False, 'index': '10114678:Audio DVT test plan'}, 10085083: {'id': 10085083, 'name': 'ESW Test Plan', 'archived': False, 'index': '10085083:ESW Test Plan'}, 10379857: {'id': 10379857, 'name': 'Product Verification Test Plan', 'archived': False, 'index': '10379857:Product Verification Test Plan'}, 10065904: {'id': 10065904, 'name': 'Regulatory Compliance Plan ', 'archived': False, 'index': '10065904:Regulatory Compliance Plan '}}"
+2023-02-01 09:47:35 I Moonr Get_alltests    "Get project name:Moonraker id:20612 all testplans successful!!!"
+2023-02-01 09:52:15 I Moonr tidy_alltestcas "571"
+2023-02-01 09:53:40 I Moonr Print           "DROP TABLE IF EXISTS testcases:successful"
+2023-02-01 09:53:40 I Moonr Print           "CREATE TABLE IF NOT EXISTS testcases (                             testplan_id INT,                             testplan_name TEXT,                             testgroup_id INT,                             testgroup_name TEXT,                             testcycle_id INT,                             testcycle_name TEXT,                             rel TEXT,                             id INT,                             uniqueid TEXT,                             name TEXT,                             status TEXT,                             upstream TEXT,                             downstream TEXT,                             executionDate TEXT) ENGINE=InnoDB DEFAULT CHARSET=utf8:successful"
+2023-02-01 09:53:40 I Moonr update_database "Insert testcases table successful"
+2023-02-01 09:53:40 I Moonr Print           "CREATE TABLE IF NOT EXISTS tests (                             testplan_id INT,                             testplan_name TEXT,                             testplan_status TEXT,                             rel TEXT, status TEXT,                             count INT, date TEXT) ENGINE=InnoDB DEFAULT CHARSET=utf8:successful"
+2023-02-01 09:53:40 I Moonr Print           "DELETE FROM tests WHERE date='2023-02-01':successful"
+2023-02-01 09:53:40 I Moonr Print           "SELECT testplan_id FROM tests GROUP BY testplan_id:successful"
+2023-02-01 09:53:40 I Moonr Print           "SELECT testplan_name FROM tests WHERE testplan_id=10085083 LIMIT 1:successful"
+2023-02-01 09:53:40 I Moonr Print           "UPDATE tests SET testplan_status='Active' WHERE testplan_id=10085083:successful"
+2023-02-01 09:53:40 I Moonr Print           "SELECT testplan_name FROM tests WHERE testplan_id=10379857 LIMIT 1:successful"
+2023-02-01 09:53:40 I Moonr Print           "UPDATE tests SET testplan_status='Active' WHERE testplan_id=10379857:successful"
+2023-02-01 09:53:40 I Moonr Print           "SELECT testplan_name FROM tests WHERE testplan_id=10065904 LIMIT 1:successful"
+2023-02-01 09:53:40 I Moonr Print           "UPDATE tests SET testplan_status='Active' WHERE testplan_id=10065904:successful"
+2023-02-01 09:53:40 I Moonr Print           "INSERT INTO tests (testplan_id, testplan_name, testplan_status, rel, status, count, date) SELECT testplan_id, testplan_name, 'Active' as testplan_status, rel, status, count((@rn := @rn + 1)) as count, '2023-02-01' as date FROM testcases cross join (select @rn := 0) const GROUP BY testplan_id, rel, status:successful"
+2023-02-01 09:53:40 I Moonr update_database "Insert tests table successful"
+2023-02-01 09:53:40 I Moonr Print           "CREATE TABLE IF NOT EXISTS testapproval (                                 rel TEXT, team TEXT, status TEXT, upstream TEXT, count INT, date TEXT                                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8:successful"
+2023-02-01 09:53:40 I Moonr Print           "DROP TABLE IF EXISTS alltestapproval:successful"
+2023-02-01 09:53:40 I Moonr Print           "CREATE TABLE IF NOT EXISTS alltestapproval (                                 id INT, uniqueid TEXT, name TEXT, status TEXT, rel TEXT, team TEXT, upstream TEXT                                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8:successful"
+2023-02-01 09:53:40 I Moonr Print           "DELETE FROM testapproval WHERE date='2023-02-01':successful"
+2023-02-01 09:53:40 I Moonr Print           "INSERT INTO testapproval (rel, team, status, count, date, upstream) SELECT rel, team, status, count((@rn := @rn + 1)) as count, '2023-02-01' as date, upstream FROM alltestapproval cross join (select @rn := 0) const GROUP BY rel, team, status, upstream:successful"
+2023-02-01 09:53:53 I Moonr Get_allfeatuers "[]"
+2023-02-01 09:53:53 I Moonr Print           "CREATE TABLE IF NOT EXISTS features (                                rel TEXT, status TEXT, count INT, date TEXT) ENGINE=InnoDB DEFAULT CHARSET=utf8:successful"
+2023-02-01 09:53:53 I Moonr Print           "CREATE TABLE IF NOT EXISTS allfeatures (                                id INT, uniqueid TEXT, name TEXT, status TEXT, rel TEXT,test_status TEXT) ENGINE=InnoDB DEFAULT CHARSET=utf8:successful"
+2023-02-01 09:53:53 I Moonr Print           "DELETE FROM features WHERE date='2023-02-01':successful"
+2023-02-01 09:53:53 I Moonr Print           "INSERT INTO features (rel, status, count, date)                                 SELECT rel, status, count((@rn := @rn + 1)) as count, '2023-02-01' as date FROM allfeatures cross join (select @rn := 0) const GROUP BY rel, status:successful"
+2023-02-01 09:53:59 I Moonr Get_allchangere "[]"
+2023-02-01 09:53:59 I Moonr Print           "CREATE TABLE IF NOT EXISTS changes (                                 rel TEXT, status TEXT, priority TEXT,                                 requester TEXT, date TEXT, count INT) ENGINE=InnoDB DEFAULT CHARSET=utf8:successful"
+2023-02-01 09:53:59 I Moonr Print           "CREATE TABLE IF NOT EXISTS allchanges (                                 id INT, uniqueid TEXT, name TEXT,                                 status TEXT, rel TEXT, priority TEXT,                                 requester TEXT) ENGINE=InnoDB DEFAULT CHARSET=utf8:successful"
+2023-02-01 09:53:59 I Moonr Print           "DELETE FROM changes WHERE date='2023-02-01':successful"
+2023-02-01 09:53:59 I Moonr Print           "INSERT INTO changes (                                 rel, status, priority, requester, date, count)                                 SELECT rel, status, priority, requester, '2023-02-01' as date, count((@rn := @rn + 1)) as count FROM allchanges                                 cross join (select @rn := 0) const GROUP BY rel, status, priority, requester:successful"
+2023-02-01 09:54:06 I Moonr Print           "CREATE TABLE IF NOT EXISTS designspec (                            rel TEXT, team TEXT, status TEXT, count INT, date text) ENGINE=InnoDB DEFAULT CHARSET=utf8:successful"
+2023-02-01 09:54:06 I Moonr Print           "CREATE TABLE IF NOT EXISTS alldesignspec (                             id INT, uniqueid TEXT, name TEXT, status TEXT, rel TEXT, team TEXT) ENGINE=InnoDB DEFAULT CHARSET=utf8:successful"
+2023-02-01 09:54:06 I Moonr Print           "DELETE FROM designspec WHERE date='2023-02-01':successful"
+2023-02-01 09:54:06 I Moonr Print           "INSERT INTO designspec (rel, team, status, count, date) SELECT rel, team, status, count((@rn := @rn + 1)) as count, '2023-02-01' as date FROM alldesignspec cross join (select @rn := 0) const GROUP BY rel, team, status:successful"
+2023-02-01 09:54:19 I Moonr Get_alluserstor "[]"
+2023-02-01 09:54:19 I Moonr Print           "CREATE TABLE IF NOT EXISTS userstories (                 rel TEXT, status TEXT, count INT, date TEXT) ENGINE=InnoDB DEFAULT CHARSET=utf8:successful"
+2023-02-01 09:54:19 I Moonr Print           "CREATE TABLE IF NOT EXISTS alluserstories (                 id INT, uniqueid TEXT, name TEXT, status TEXT, rel TEXT) ENGINE=InnoDB DEFAULT CHARSET=utf8:successful"
+2023-02-01 09:54:19 I Moonr Print           "DELETE FROM userstories WHERE date='2023-02-01':successful"
+2023-02-01 09:54:19 I Moonr Print           "INSERT INTO userstories (rel, status, count, date) SELECT rel, status, count((@rn := @rn + 1)) as count, '2023-02-01' as date FROM alluserstories cross join (select @rn := 0) const GROUP BY rel, status:successful"
+Traceback (most recent call last):
+  File "E:\New Jira_Jama\Jama_jira_script\REST_Jama20201207.py", line 196, in fetch_data
+    jamadata.Get_and_Save()
+  File "E:\New Jira_Jama\Jama_jira_script\Subprogress.py", line 461, in Get_and_Save
+    self.Get_alldefects()
+  File "E:\New Jira_Jama\Jama_jira_script\Subprogress.py", line 611, in Get_alldefects
+    self.P_alldefects = self.get_alldefects(projectId, defects_type_id)
+  File "E:\New Jira_Jama\Jama_jira_script\Subprogress.py", line 324, in get_alldefects
+    params={"project":projectId,"startAt":0,"maxResults":50,"itemType":item_type_id}, callback=data_reshape.getAllDefects, endless=True)
+  File "E:\New Jira_Jama\Jama_jira_script\api\api_common.py", line 179, in getResource
+    return callback(rawdatas,rawmeta)
+  File "E:\New Jira_Jama\Jama_jira_script\data_reshape.py", line 443, in getAllDefects
+    "priorityId":item["fields"]["priority"], "priority":"","upstream":"","jira":jira})
+KeyError: 'priority'

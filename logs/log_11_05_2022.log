@@ -1,0 +1,4 @@
+03:32:19 [JIRA]: Processing all projects from Jira
+03:32:19 [JIRA]: Total projects fetched: 0
+03:32:19 [JIRA]: Saving projects in db
+03:32:19 [JIRA]: Done fetching & parsing data from Jira. Elapsed time: 0.13785960000000053

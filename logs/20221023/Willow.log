@@ -1,0 +1,71 @@
+2022-10-23 04:59:18 I Willo Print           "Connet 20565 successfully!!!"
+2022-10-23 04:59:18 I Willo Get_alltests    "Get project name:Willow id:20565 all testplans"
+2022-10-23 04:59:22 I Willo Get_alltests    "{8765140: {'id': 8765140, 'name': 'Audio Test Plan', 'archived': False, 'index': '8765140:Audio Test Plan'}, 8936933: {'id': 8936933, 'name': 'ESW Test Plan', 'archived': False, 'index': '8936933:ESW Test Plan'}, 8949044: {'id': 8949044, 'name': 'HW Test Plan', 'archived': False, 'index': '8949044:HW Test Plan'}, 8865026: {'id': 8865026, 'name': 'MT Test Plan', 'archived': False, 'index': '8865026:MT Test Plan'}, 9608480: {'id': 9608480, 'name': 'Packaging Transportation Test', 'archived': False, 'index': '9608480:Packaging Transportation Test'}, 8757540: {'id': 8757540, 'name': 'Product Quality Plan and PVT inputs', 'archived': False, 'index': '8757540:Product Quality Plan and PVT inputs'}, 8545478: {'id': 8545478, 'name': 'Product Verification Test Plan', 'archived': False, 'index': '8545478:Product Verification Test Plan'}, 8806675: {'id': 8806675, 'name': 'Regulatory compliance test plan', 'archived': False, 'index': '8806675:Regulatory compliance test plan'}, 8949050: {'id': 8949050, 'name': 'RF Test Plan', 'archived': False, 'index': '8949050:RF Test Plan'}, 8868539: {'id': 8868539, 'name': 'UX test plan', 'archived': False, 'index': '8868539:UX test plan'}}"
+2022-10-23 04:59:22 I Willo Get_alltests    "Get project name:Willow id:20565 all testplans successful!!!"
+2022-10-23 05:12:55 I Willo tidy_alltestcas "1899"
+2022-10-23 05:17:17 I Willo Print           "DROP TABLE IF EXISTS testcases:successful"
+2022-10-23 05:17:17 I Willo Print           "CREATE TABLE IF NOT EXISTS testcases (                             testplan_id INT,                             testplan_name TEXT,                             testgroup_id INT,                             testgroup_name TEXT,                             testcycle_id INT,                             testcycle_name TEXT,                             rel TEXT,                             id INT,                             uniqueid TEXT,                             name TEXT,                             status TEXT,                             upstream TEXT,                             downstream TEXT,                             executionDate TEXT) ENGINE=InnoDB DEFAULT CHARSET=utf8:successful"
+2022-10-23 05:17:17 I Willo update_database "Insert testcases table successful"
+2022-10-23 05:17:17 I Willo Print           "CREATE TABLE IF NOT EXISTS tests (                             testplan_id INT,                             testplan_name TEXT,                             testplan_status TEXT,                             rel TEXT, status TEXT,                             count INT, date TEXT) ENGINE=InnoDB DEFAULT CHARSET=utf8:successful"
+2022-10-23 05:17:17 I Willo Print           "DELETE FROM tests WHERE date='2022-10-23':successful"
+2022-10-23 05:17:17 I Willo Print           "SELECT testplan_id FROM tests GROUP BY testplan_id:successful"
+2022-10-23 05:17:17 I Willo Print           "SELECT testplan_name FROM tests WHERE testplan_id=8765140 LIMIT 1:successful"
+2022-10-23 05:17:17 I Willo Print           "UPDATE tests SET testplan_status='Active' WHERE testplan_id=8765140:successful"
+2022-10-23 05:17:17 I Willo Print           "SELECT testplan_name FROM tests WHERE testplan_id=8936933 LIMIT 1:successful"
+2022-10-23 05:17:17 I Willo Print           "UPDATE tests SET testplan_status='Active' WHERE testplan_id=8936933:successful"
+2022-10-23 05:17:17 I Willo Print           "SELECT testplan_name FROM tests WHERE testplan_id=8949044 LIMIT 1:successful"
+2022-10-23 05:17:17 I Willo Print           "UPDATE tests SET testplan_status='Active' WHERE testplan_id=8949044:successful"
+2022-10-23 05:17:17 I Willo Print           "SELECT testplan_name FROM tests WHERE testplan_id=8865026 LIMIT 1:successful"
+2022-10-23 05:17:17 I Willo Print           "UPDATE tests SET testplan_status='Active' WHERE testplan_id=8865026:successful"
+2022-10-23 05:17:17 I Willo Print           "SELECT testplan_name FROM tests WHERE testplan_id=9608480 LIMIT 1:successful"
+2022-10-23 05:17:17 I Willo Print           "UPDATE tests SET testplan_status='Active' WHERE testplan_id=9608480:successful"
+2022-10-23 05:17:17 I Willo Print           "SELECT testplan_name FROM tests WHERE testplan_id=8545478 LIMIT 1:successful"
+2022-10-23 05:17:17 I Willo Print           "UPDATE tests SET testplan_status='Active' WHERE testplan_id=8545478:successful"
+2022-10-23 05:17:17 I Willo Print           "SELECT testplan_name FROM tests WHERE testplan_id=8806675 LIMIT 1:successful"
+2022-10-23 05:17:17 I Willo Print           "UPDATE tests SET testplan_status='Active' WHERE testplan_id=8806675:successful"
+2022-10-23 05:17:17 I Willo Print           "SELECT testplan_name FROM tests WHERE testplan_id=8949050 LIMIT 1:successful"
+2022-10-23 05:17:17 I Willo Print           "UPDATE tests SET testplan_status='Active' WHERE testplan_id=8949050:successful"
+2022-10-23 05:17:17 I Willo Print           "SELECT testplan_name FROM tests WHERE testplan_id=8868539 LIMIT 1:successful"
+2022-10-23 05:17:17 I Willo Print           "UPDATE tests SET testplan_status='Active' WHERE testplan_id=8868539:successful"
+2022-10-23 05:17:17 I Willo Print           "INSERT INTO tests (testplan_id, testplan_name, testplan_status, rel, status, count, date) SELECT testplan_id, testplan_name, 'Active' as testplan_status, rel, status, count((@rn := @rn + 1)) as count, '2022-10-23' as date FROM testcases cross join (select @rn := 0) const GROUP BY testplan_id, rel, status:successful"
+2022-10-23 05:17:17 I Willo update_database "Insert tests table successful"
+2022-10-23 05:17:17 I Willo Print           "CREATE TABLE IF NOT EXISTS testapproval (                                 rel TEXT, team TEXT, status TEXT, upstream TEXT, count INT, date TEXT                                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8:successful"
+2022-10-23 05:17:17 I Willo Print           "DROP TABLE IF EXISTS alltestapproval:successful"
+2022-10-23 05:17:17 I Willo Print           "CREATE TABLE IF NOT EXISTS alltestapproval (                                 id INT, uniqueid TEXT, name TEXT, status TEXT, rel TEXT, team TEXT, upstream TEXT                                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8:successful"
+2022-10-23 05:17:17 I Willo Print           "DELETE FROM testapproval WHERE date='2022-10-23':successful"
+2022-10-23 05:17:17 I Willo Print           "INSERT INTO testapproval (rel, team, status, count, date, upstream) SELECT rel, team, status, count((@rn := @rn + 1)) as count, '2022-10-23' as date, upstream FROM alltestapproval cross join (select @rn := 0) const GROUP BY rel, team, status, upstream:successful"
+2022-10-23 05:17:23 I Willo Get_allfeatuers "[{'id': 8258467, 'name': 'Bluetooth Low Energy support', 'documentKey': 'Wil-FEAT-61', 'statusId': 156410, 'status': 'Approved'}, {'id': 8257003, 'name': 'MFi certified', 'documentKey': 'Wil-FEAT-44', 'statusId': 156584, 'status': 'Proposal'}, {'id': 8531489, 'name': 'Enumerate as non audio device when docked', 'documentKey': 'Wil-FEAT-134', 'statusId': 156410, 'status': 'Approved'}, {'id': 8258422, 'name': 'Alexa Mobile Accessory (AMA)', 'documentKey': 'Wil-FEAT-54', 'statusId': 156410, 'status': 'Approved'}, {'id': 8259074, 'name': 'MySound for speech', 'documentKey': 'Wil-FEAT-90', 'statusId': 156412, 'status': 'Rejected'}]"
+2022-10-23 05:17:23 I Willo Print           "CREATE TABLE IF NOT EXISTS features (                                rel TEXT, status TEXT, count INT, date TEXT) ENGINE=InnoDB DEFAULT CHARSET=utf8:successful"
+2022-10-23 05:17:23 I Willo Print           "CREATE TABLE IF NOT EXISTS allfeatures (                                id INT, uniqueid TEXT, name TEXT, status TEXT, rel TEXT,test_status TEXT) ENGINE=InnoDB DEFAULT CHARSET=utf8:successful"
+2022-10-23 05:17:23 I Willo Print           "DELETE FROM features WHERE date='2022-10-23':successful"
+2022-10-23 05:17:23 I Willo Print           "DELETE FROM allfeatures WHERE id=17356384:successful"
+2022-10-23 05:17:23 I Willo Print           "DELETE FROM allfeatures WHERE id=16580563:successful"
+2022-10-23 05:17:23 I Willo Print           "DELETE FROM allfeatures WHERE id=16580445:successful"
+2022-10-23 05:17:23 I Willo Print           "DELETE FROM allfeatures WHERE id=16579590:successful"
+2022-10-23 05:17:23 I Willo Print           "DELETE FROM allfeatures WHERE id=16579516:successful"
+2022-10-23 05:17:23 I Willo Print           "DELETE FROM allfeatures WHERE id=16579505:successful"
+2022-10-23 05:17:23 I Willo Print           "DELETE FROM allfeatures WHERE id=16085154:successful"
+2022-10-23 05:17:23 I Willo Print           "DELETE FROM allfeatures WHERE id=15987793:successful"
+2022-10-23 05:17:23 I Willo Print           "DELETE FROM allfeatures WHERE id=15899579:successful"
+2022-10-23 05:17:23 I Willo Print           "DELETE FROM allfeatures WHERE id=15899567:successful"
+2022-10-23 05:17:23 I Willo Print           "DELETE FROM allfeatures WHERE id=15834015:successful"
+2022-10-23 05:17:23 I Willo Print           "DELETE FROM allfeatures WHERE id=8258467:successful"
+2022-10-23 05:17:23 I Willo Print           "DELETE FROM allfeatures WHERE id=8257003:successful"
+2022-10-23 05:17:23 I Willo Print           "DELETE FROM allfeatures WHERE id=8531489:successful"
+2022-10-23 05:17:23 I Willo Print           "DELETE FROM allfeatures WHERE id=8258422:successful"
+2022-10-23 05:17:23 I Willo Print           "DELETE FROM allfeatures WHERE id=8259074:successful"
+2022-10-23 05:17:23 I Willo Print           "INSERT INTO features (rel, status, count, date)                                 SELECT rel, status, count((@rn := @rn + 1)) as count, '2022-10-23' as date FROM allfeatures cross join (select @rn := 0) const GROUP BY rel, status:successful"
+Traceback (most recent call last):
+  File "E:\New Jira_Jama\Jama_jira_script\REST_Jama20201207.py", line 196, in fetch_data
+    jamadata.Get_and_Save()
+  File "E:\New Jira_Jama\Jama_jira_script\Subprogress.py", line 452, in Get_and_Save
+    self.Get_allchangerequests()
+  File "E:\New Jira_Jama\Jama_jira_script\Subprogress.py", line 544, in Get_allchangerequests
+    self.P_changerequests =  self.get_change_requests(projectId, change_request_type_id)
+  File "E:\New Jira_Jama\Jama_jira_script\Subprogress.py", line 255, in get_change_requests
+    callback=data_reshape.getChangeRequests, endless=True)
+  File "E:\New Jira_Jama\Jama_jira_script\api\api_common.py", line 179, in getResource
+    return callback(rawdatas,rawmeta)
+  File "E:\New Jira_Jama\Jama_jira_script\data_reshape.py", line 340, in getChangeRequests
+    result.append({"id":item["id"], "name":item["fields"]["name"], "documentKey":item["documentKey"], "statusId":item["fields"]["status"], "status":"","priorityId":item["fields"]["priority"],"priority":"","req":req})
+KeyError: 'priority'
